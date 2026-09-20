@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Large raw datasets & archives (processed .npy files in datasets/ are preserved)
+Dataset/
+datasets/CALCE/raw/
+*.zip
+*.tar.gz
+*.rar
+
+# Scratch and intermediate experiment artifacts
+scratch/
+GarbageResults/
+E07_results/
+*.tmp
+.pytest_cache/
+
+# LaTeX build artifacts & temporary page preview renders
+Te_Q_draft/*.aux
+Te_Q_draft/*.log
+Te_Q_draft/*.out
+Te_Q_draft/*.blg
+Te_Q_draft/*.png
+Te_Q_draft/*.pdf

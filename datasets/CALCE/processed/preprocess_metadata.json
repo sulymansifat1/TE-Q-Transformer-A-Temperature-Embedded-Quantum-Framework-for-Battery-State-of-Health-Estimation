@@ -1,0 +1,42 @@
+{
+  "dataset": "CALCE CS2",
+  "source": "https://web.calce.umd.edu/batteries/data/",
+  "raw_root": "Dataset\\calce\\raw",
+  "cells": [
+    "CS2_35",
+    "CS2_36",
+    "CS2_37",
+    "CS2_38"
+  ],
+  "feature_order": [
+    "Voltage_V",
+    "Current_A",
+    "Temperature_C",
+    "Time_norm"
+  ],
+  "shape_contract": "[N, 512, 4]",
+  "sequence_length": 512,
+  "window_semantics": "one complete 1C discharge resampled by linear interpolation onto 512 normalized phase points; windows never cross a file or Cycle_Index",
+  "current_provenance": "measured Arbin Current(A); discharge negative",
+  "temperature_policy": "constant 23.0 C ambient fill; Excel logs have no temperature column",
+  "time_policy": "within-discharge Test_Time(s) converted to unitless phase 0..1",
+  "soh_formula": "per-discharge Ah increment / first valid discharge Ah of that cell",
+  "capacity_definition": "abs(last-first Discharge_Capacity(Ah) within the discharge step)",
+  "scaling_policy": "no scaler fitted; output is unscaled physical units plus Time_norm",
+  "discharge_current_threshold_A": -0.4,
+  "min_capacity_ah": 0.15,
+  "max_capacity_ah": 1.3,
+  "excluded_count": 128,
+  "cell_window_counts": {
+    "CS2_35": 880,
+    "CS2_36": 968,
+    "CS2_37": 1036,
+    "CS2_38": 1025
+  },
+  "initial_capacity_ah": {
+    "CS2_35": 1.1384600400924683,
+    "CS2_36": 1.144814372062683,
+    "CS2_37": 1.1349493265151978,
+    "CS2_38": 1.1395230293273926
+  }
+}

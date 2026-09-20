@@ -1,0 +1,135 @@
+TE-Q-Transformer Model Architecture
+=================================
+
+Overview
+--------
+TE-Q-Transformer is a hybrid quantum-classical sequence model for battery SOH prediction. It embeds four input features per time step using a physics-informed quantum circuit, projects the quantum outputs into a transformer latent space, applies temporal smoothing, and then models the sequence with a Transformer encoder. A pooled representation is mapped to a scalar SOH prediction. The notebook keeps a single retained variant (rich entangler) for the ablation run.
+
+Inputs
+------
+- Input tensor shape: [B, L, 4]
+  - B: batch size
+  - L: sequence length (512)
+  - 4 input channels: Voltage, Current, Temperature (C), Time_norm
+
+Configuration (TEQTransformerConfig defaults)
+---------------------------------------------
+- input_dim: 4
+- seq_len: 512
+- quantum_dim: 4
+- d_model: 64
+- n_heads: 2
+- n_layers: 3
+- dim_feedforward: 64
+- dropout: 0.0
+- q_device: default.qubit
+- entangler_layers: 1
+- entangler_type: basic
+- use_pauli_feature_map: False
+- feature_map_reps: 1
+- feature_map_entangle: True
+- use_cls_token: True
+- pooling: cls
+- use_positional_encoding: True
+- use_temporal_smooth: True
+- temporal_kernel_size: 3
+- use_gru_smoother: False
+- gru_num_layers: 1
+- gru_dropout: 0.0
+- head_hidden_dim: 64
+- use_residual_mlp: False
+- residual_mlp_dim: 128
+
+Single Retained Model (current run)
+----------------------------------
+- entangler_type: rich
+- use_pauli_feature_map: False
+- use_gru_smoother: False
+- use_temporal_smooth: True
+
+Model Components
+----------------
+1) QuantumEmbeddingLayer
+- Purpose: physics-informed quantum feature embedding using an Arrhenius temperature gate.
+- Input: flattened sequence [B*L, 4]
+- Process:
+  - Map Voltage, Current, Time_norm to rotation angles: angle = value * pi.
+  - Convert Temperature (C) to Kelvin and compute Arrhenius terms:
+    - T_k = clamp(T_c + 273.15, min=1.0)
+    - inv_t = 1 / T_k
+    - inv_t_ref = 1 / T_ref, with T_ref = 298.15 K
+    - Ea_sei and Ea_pl are trainable parameters.
+    - sei_term = exp((Ea_sei*10000/R) * (inv_t_ref - inv_t))
+    - plating_term = exp((Ea_pl*10000/R) * (inv_t - inv_t_ref))
+    - phi = sei_term + plating_term
+    - theta_temp = pi * phi / 4
+  - Construct angle vector [voltage_angle, current_angle, time_angle, theta_temp].
+  - Run PennyLane circuit (default.qubit, backprop):
+    - Optional Pauli feature map (disabled in the current run): repeated RX/RY per qubit plus CZ entanglers.
+    - Apply RY on each qubit with the 4 angles.
+    - Entangler options:
+      - basic: BasicEntanglerLayers with trainable weights.
+      - rich: layered RZ + CNOT + IsingZZ (+ optional Toffoli) + Hadamard + RZ.
+    - Read out PauliZ expectations from each qubit.
+- Output: quantum features [B*L, 4]
+
+2) Quantum Projection
+- Linear layer: 4 -> d_model (64)
+- Output: [B*L, 64]
+- Reshape to sequence: [B, L, 64]
+
+3) Temporal Smoothing (Conv1D)
+- 1D convolution across sequence length:
+  - in_channels = d_model
+  - out_channels = d_model
+  - kernel_size = 3
+  - padding = 1
+- Applied on transposed sequence [B, d_model, L]
+
+4) Optional Residual MLP
+- Disabled in the current config.
+- When enabled: Linear(d_model -> residual_mlp_dim) + GELU + Linear(residual_mlp_dim -> d_model)
+
+5) CLS Token + Positional Encoding
+- CLS token: trainable [1, 1, d_model], prepended to sequence.
+- Positional encoding: sinusoidal, max_len = seq_len + 2.
+
+6) Transformer Encoder
+- nn.TransformerEncoder with 3 layers:
+  - d_model = 64
+  - n_heads = 2
+  - dim_feedforward = 64
+  - activation = GELU
+  - dropout = 0.0
+  - batch_first = True
+  - norm_first = True
+
+7) Pooling
+- CLS pooling (default): use the first token output.
+- Mean pooling alternative when cls is disabled.
+
+8) Prediction Head
+- Linear(d_model -> head_hidden_dim) + GELU + Dropout + Linear(head_hidden_dim -> 1)
+- Output: SOH prediction per sequence, shape [B]
+
+Data Flow Summary
+-----------------
+1) Input x: [B, L, 4]
+2) Flatten: [B*L, 4]
+3) QuantumEmbeddingLayer -> [B*L, 4]
+4) Linear projection -> [B*L, 64]
+5) Reshape -> [B, L, 64]
+6) Temporal smoothing (Conv1D) -> [B, L, 64]
+7) Optional residual MLP
+8) Add CLS token -> [B, L+1, 64]
+9) Add positional encoding
+10) Transformer encoder -> [B, L+1, 64]
+11) Pool (CLS) -> [B, 64]
+12) Head -> [B, 1] -> squeeze -> [B]
+
+Key Notes
+---------
+- The quantum circuit is executed on CPU (default.qubit); PyTorch tensors are moved to CPU for quantum evaluation and then returned to the original device.
+- Temperature remains unscaled to preserve physical meaning in the Arrhenius term.
+- The model enforces input dimension and sequence length checks at runtime.
+- Conv1D smoothing and GRU smoothing are mutually exclusive (GRU is disabled in the current run).

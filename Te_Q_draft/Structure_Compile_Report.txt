@@ -1,0 +1,116 @@
+STRUCTURE COMPILE REPORT
+========================================================================
+Manuscript: cas-dc-template.tex
+Engine:     pdfLaTeX (MiKTeX 24.1) + BibTeX (model1-num-names)
+Command sequence:
+  pdflatex -interaction=nonstopmode cas-dc-template.tex
+  bibtex cas-dc-template
+  pdflatex -interaction=nonstopmode cas-dc-template.tex
+  pdflatex -interaction=nonstopmode cas-dc-template.tex
+
+Output: cas-dc-template.pdf (19 pages)
+
+========================================================================
+RESTRUCTURING-RELATED CHECKS
+========================================================================
+Fatal errors introduced by restructuring: NONE
+
+Missing section labels: NONE
+All required labels exist in cas-dc-template.aux:
+
+  sec:intro            -> 1     Introduction
+  sec:related          -> 2     Related Work
+  sec:rw-data          -> 2.1   Data-driven Battery SOH Estimation
+  sec:rw-physics       -> 2.2   Physics-guided and Temperature-aware SOH Estimation
+  sec:rw-qml           -> 2.3   Quantum Machine Learning for Battery SOH Estimation
+  sec:method           -> 3     Methodology
+  sec:problem          -> 3.1   Problem Formulation
+  sec:datasets         -> 3.2   Datasets and Preprocessing
+  sec:training         -> 3.3   Training and Evaluation Protocol
+  sec:baselines        -> 3.4   Baseline Models
+  sec:architecture     -> 3.5   Proposed TE-Q-Transformer Architecture
+  sec:results          -> 4     Experiments and Results
+  sec:exp-setup        -> 4.1   Experimental Setup
+  sec:nasa             -> 4.2   Main Benchmark Performance
+  sec:qualitative-traj -> 4.3   Qualitative SOH Trajectory Analysis
+  sec:qualitative      -> 4.4   Cell-wise Generalization Analysis
+  sec:ablation         -> 4.5   Ablation Studies
+  sec:discussion       -> 4.6   Evidence-based Analysis
+  sec:calce            -> 4.7   External Validation on CALCE
+  sec:threats          -> 5     Threats to Validity
+  sec:external         -> 5.1   External Validity
+  sec:internal         -> 5.2   Internal Validity
+  sec:construct        -> 5.3   Construct Validity
+  sec:conclusion       -> 6     Conclusion
+
+Broken internal references caused by restructuring: NONE
+After the full pdflatex/bibtex cycle, the log has no
+"LaTeX Warning: Reference ... undefined" and no
+"Package natbib Warning: Citation ... undefined".
+
+Figures loaded (8/8):
+  figs/teq_methodology.png
+  figs/teq_architecture.png
+  figs/error.png
+  figs/NASA-b0018.png
+  figs/NASA-b0032.png
+  figs/NASA b0053.png
+  figs/CALCE CS2-38.png
+  figs/CALCE CS2-37.png
+
+Tables: all five table environments are present in the source and
+were processed. See pre-existing local engine note below.
+
+Equations: all 11 equation environments compiled. Algorithm
+alg:quantum compiled.
+
+Bibliography: BibTeX completed. Database cas-refs.bib loaded.
+Four BibTeX warnings are pre-existing (dataset entry types and
+empty fields in vaswani2017).
+
+========================================================================
+PRE-EXISTING LOCAL ERRORS (NOT CAUSED BY RESTRUCTURING)
+========================================================================
+The same errors occur when compiling
+cas-dc-template_BEFORE_STRUCTURE_REORGANIZATION.tex
+with halt-on-error.
+
+1. Undefined control sequence \insert@pcolumn
+   Location: baseline configuration tabular (array >{...} column
+   specifiers) and ablation tabularx.
+   Cause: local CAS class / colortbl / array interaction on this
+   MiKTeX installation. Table source was not changed.
+   With -halt-on-error, compilation stops here in BOTH the backup
+   and the restructured file.
+   With -interaction=nonstopmode, TeX recovers and writes a PDF.
+
+2. Duplicate hyperref destinations for figure.* / table.*
+   CAS class + hyperref. Pre-existing.
+
+3. Overfull \hbox in the front matter (line 117). Pre-existing.
+
+4. BibTeX: entry type for saha2007battery and w9rg-7173-25 is not
+   style-file defined; empty booktitle/pages in vaswani2017.
+   Pre-existing.
+
+These warnings/errors are documented here only. They were not
+fixed in this structural pass (table markup and preamble were
+left unchanged).
+
+========================================================================
+VERDICT
+========================================================================
+Compilation: PASS
+
+PDF produced (19 pages).
+No missing section labels.
+No broken references caused by restructuring.
+Figures load.
+Equations compile.
+Bibliography compiles.
+
+The only fatal-class TeX errors are the pre-existing
+\insert@pcolumn table-engine errors, identical in the backup
+manuscript. They are not a result of the section reorganization.
+Overleaf's CAS TeX Live image may recover differently; the .tex
+itself is unchanged in table markup.

@@ -1,0 +1,157 @@
+{
+  "claim": "zero-shot cross-dataset/cross-cell generalisation from NASA to CALCE",
+  "not_a_claim": [
+    "cross-temperature generalisation",
+    "leave-one-battery-out",
+    "CALCE-trained model performance"
+  ],
+  "checkpoint": "artifacts\\nasa\\01_rich_entangler\\nasa_teq_transformer_best.pth",
+  "scaler_path": "artifacts\\nasa\\nasa_train_scaler.pkl",
+  "model_variant": "01_rich_entangler",
+  "feature_order": [
+    "Voltage_V",
+    "Current_A",
+    "Temperature_C",
+    "Time_norm"
+  ],
+  "n_windows_by_cell": {
+    "CS2_35": 880,
+    "CS2_36": 968,
+    "CS2_37": 1036,
+    "CS2_38": 1025
+  },
+  "scaler": {
+    "clip_after_transform": true,
+    "scaler_data_min": [
+      1.7615504264831543,
+      -4.030289173126221,
+      0.0
+    ],
+    "scaler_data_max": [
+      4.233264446258545,
+      0.007247371133416891,
+      1.0
+    ],
+    "fractions": {
+      "CS2_35": {
+        "Voltage_below_train_range_fraction": 0.0,
+        "Voltage_above_train_range_fraction": 0.0,
+        "Current_below_train_range_fraction": 0.0,
+        "Current_above_train_range_fraction": 0.0,
+        "Time_norm_below_train_range_fraction": 0.0,
+        "Time_norm_above_train_range_fraction": 0.0
+      },
+      "CS2_36": {
+        "Voltage_below_train_range_fraction": 0.0,
+        "Voltage_above_train_range_fraction": 0.0,
+        "Current_below_train_range_fraction": 0.0,
+        "Current_above_train_range_fraction": 0.0,
+        "Time_norm_below_train_range_fraction": 0.0,
+        "Time_norm_above_train_range_fraction": 0.0
+      },
+      "CS2_37": {
+        "Voltage_below_train_range_fraction": 0.0,
+        "Voltage_above_train_range_fraction": 0.0,
+        "Current_below_train_range_fraction": 0.0,
+        "Current_above_train_range_fraction": 0.0,
+        "Time_norm_below_train_range_fraction": 0.0,
+        "Time_norm_above_train_range_fraction": 0.0
+      },
+      "CS2_38": {
+        "Voltage_below_train_range_fraction": 0.0,
+        "Voltage_above_train_range_fraction": 0.0,
+        "Current_below_train_range_fraction": 0.0,
+        "Current_above_train_range_fraction": 0.0,
+        "Time_norm_below_train_range_fraction": 0.0,
+        "Time_norm_above_train_range_fraction": 0.0
+      }
+    },
+    "calce_scaler_fit_performed": false
+  },
+  "per_cell": {
+    "CS2_35": {
+      "n": 880,
+      "RMSE": 0.2933456003665924,
+      "MAE": 0.241471529006958,
+      "MAPE_pct": 42.562095642089844,
+      "R2": -2.0704715348715053,
+      "MaxE": 0.8028775453567505,
+      "mean_error": -0.241471529006958,
+      "std_error": 0.16656270623207092
+    },
+    "CS2_36": {
+      "n": 968,
+      "RMSE": 0.373086154460907,
+      "MAE": 0.2937369644641876,
+      "MAPE_pct": 77.27466583251953,
+      "R2": -1.5672036920705477,
+      "MaxE": 0.8379605412483215,
+      "mean_error": -0.2937369644641876,
+      "std_error": 0.23002581298351288
+    },
+    "CS2_37": {
+      "n": 1036,
+      "RMSE": 0.3483337163925171,
+      "MAE": 0.2803473472595215,
+      "MAPE_pct": 65.72572326660156,
+      "R2": -1.7764229971272463,
+      "MaxE": 0.8283755779266357,
+      "mean_error": -0.2803473472595215,
+      "std_error": 0.20674073696136475
+    },
+    "CS2_38": {
+      "n": 1025,
+      "RMSE": 0.30610349774360657,
+      "MAE": 0.2524183690547943,
+      "MAPE_pct": 45.92684555053711,
+      "R2": -2.114724112900258,
+      "MaxE": 0.8343576192855835,
+      "mean_error": -0.2524183690547943,
+      "std_error": 0.17315979301929474
+    }
+  },
+  "overall": {
+    "n": 3909,
+    "RMSE": 0.3325178623199463,
+    "MAE": 0.26758790016174316,
+    "MAPE_pct": 58.1794319152832,
+    "R2": -1.7886917932801527,
+    "MaxE": 0.8379605412483215,
+    "mean_error": -0.26758790016174316,
+    "std_error": 0.1973951905965805
+  },
+  "mean_pm_std_over_cells": {
+    "RMSE_mean": 0.33021724224090576,
+    "RMSE_std": 0.03699973386751503,
+    "MAE_mean": 0.26699355244636536,
+    "MAE_std": 0.024202916997795,
+    "R2_mean": -1.8822055842423893,
+    "R2_std": 0.25815052594956955
+  },
+  "nasa_ablation_baseline_copied_not_recomputed": {
+    "variant": "01_rich_entangler",
+    "macro": {
+      "RMSE": 0.01678,
+      "MAE": 0.01409,
+      "R2": 0.86993
+    },
+    "per_cell": {
+      "B0018": {
+        "RMSE": 0.02714,
+        "MAE": 0.02227,
+        "R2": 0.89353
+      },
+      "B0032": {
+        "RMSE": 0.01191,
+        "MAE": 0.0105,
+        "R2": 0.90175
+      },
+      "B0053_test": {
+        "RMSE": 0.01128,
+        "MAE": 0.00951,
+        "R2": 0.8145
+      }
+    }
+  },
+  "metrics_path": "reports\\calce\\nasa_calce_zero_shot_metrics.json"
+}

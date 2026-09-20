@@ -1,0 +1,89 @@
+TEXT PRESERVATION AUDIT
+========================================================================
+
+Scope: prose paragraphs from Introduction through Conclusion.
+Ignored: section/subsection/subsubsection commands, labels, TODO comments
+introduced by this restructuring, figure/table/algorithm environments
+(captions checked separately), equation bodies (checked separately),
+and pre-existing comments.
+
+========================================================================
+COUNTS
+========================================================================
+Original active prose paragraph count: 68
+Final active prose paragraph count:    71
+Delta (final - original):              +3
+
+Moved paragraphs: literature-review paragraphs from Introduction to
+Related Work; Results-and-Discussion blocks into Experiments and Results
+subsections. Each original active paragraph occurs exactly once.
+
+Duplicated paragraphs: 0
+Missing original active paragraphs: 0
+Changed original prose paragraphs: 0
+
+========================================================================
+EXPLAINED DELTA (+3)
+========================================================================
+Threats to Validity was fully commented in the source manuscript.
+Those comments were uncommented as a structural restore (no rewrite).
+The paragraph extractor joins consecutive non-blank lines, so the
+restored Threats text appears as 3 active paragraphs:
+
+  1. External validity (original commented lines 620, 622, 623, 625)
+  2. Internal validity (original commented lines 628, 630)
+  3. Construct validity (original commented lines 635, 637)
+
+Nested inner comments inside Threats remain comments and were not
+activated. No other new scientific prose was added.
+
+TODO comments (not prose; invisible in PDF):
+  - Section 2.2 Physics-guided and Temperature-aware SOH Estimation
+  - Section 3.1 Problem Formulation
+  - Section 4.1 Experimental Setup
+  - Section 4.3 Qualitative SOH Trajectory Analysis
+    (source already merged this heading into Cell-wise result analysis;
+     combined body placed once in 4.4 to avoid duplication)
+
+========================================================================
+CAPTIONS
+========================================================================
+Original captions: 13
+Final captions:    13
+Missing captions:  0
+Extra captions:    0
+Changed captions:  0
+
+========================================================================
+EQUATIONS
+========================================================================
+Original equation environments: 11
+Final equation environments:    11
+Equation bodies identical and in same order: YES
+
+========================================================================
+TABLES
+========================================================================
+Original table environments: 5
+Final table environments:    5
+Table environments identical and in same order: YES
+
+========================================================================
+FIGURES
+========================================================================
+Original figure environments: 8
+Final figure environments:    8
+Figure environments identical as bags: YES
+Figure files and captions unchanged.
+
+========================================================================
+VERDICT
+========================================================================
+duplicated = 0
+missing = 0
+changed prose paragraphs = 0
+
+PASS: every original active prose paragraph exists exactly once and
+unchanged. The only added active prose is the uncommented Threats to
+Validity text, restored word-for-word from the source comments.
+Equations, tables, figures, and captions are preserved.

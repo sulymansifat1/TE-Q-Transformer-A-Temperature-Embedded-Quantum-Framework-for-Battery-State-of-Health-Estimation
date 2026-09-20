@@ -1,0 +1,904 @@
+                                                          Reliability Engineering and System Safety 230 (2023) 108890
+
+
+                                                                    Contents lists available at ScienceDirect
+
+
+                                                 Reliability Engineering and System Safety
+                                                            journal homepage: www.elsevier.com/locate/ress
+
+
+
+
+Deep imbalanced domain adaptation for transfer learning fault diagnosis of
+bearings under multiple working conditions
+Yifei Ding a,c , Minping Jia a ,∗, Jichao Zhuang a , Yudong Cao a , Xiaoli Zhao b , Chi-Guhn Lee c
+a
+    School of Mechanical Engineering, Southeast University, Nanjing 211189, PR China
+b
+    School of Mechanical Engineering, Nanjing University of Science and Technology, Nanjing 210014, PR China
+c
+    Centre for Maintenance Optimization and Reliability Engineering, University of Toronto, Toronto M5S 3G8, Canada
+
+
+
+ARTICLE                  INFO                              ABSTRACT
+
+Keywords:                                                  The tremendous success of deep learning and transfer learning broadened the scope of fault diagnosis,
+Fault diagnosis                                            especially the latter further improved the diagnosis accuracy under multiple working conditions. However,
+Bearings                                                   most existing attempts assume that label distribution is domain-invariant despite taking into account the
+Imbalanced domain adaptation
+                                                           different feature distributions. This does not accommodate the diversity of fault mode distributions under
+Label shift
+                                                           different operating conditions and weakens the generalization to imbalanced domain adaptation (IDA) scenar-
+Domain shift
+                                                           ios. Therefore, this work proposed a novel deep imbalanced domain adaptation (DIDA) framework for fault
+                                                           diagnosis of bearings, aiming at the challenging scenario where feature shift and label shift exist simultaneously
+                                                           under different working conditions. Specifically, DIDA overcomes the class-imbalanced label shift and achieves
+                                                           a fine-grained latent space matching by cost-sensitive learning and categorical alignment. Besides, margin
+                                                           loss regularization is introduced to further optimize classification boundaries and improve cross-domain
+                                                           generalization for IDA fault diagnosis tasks. Finally, we simulated the IDA protocols on experimental datasets
+                                                           and conducted case studies under multiple working conditions, thus validating the effectiveness and superiority
+                                                           of the proposed framework.
+
+
+
+1. Introduction                                                                                 they obtain highly distinguishable fault-related features and establish
+                                                                                                a nonlinear mapping from input features to specific fault patterns.
+    Intelligent fault diagnosis of machinery equipment is a significant                         However, this is also where the traditional deep learning models fall
+technology to ensure stable and safe operation, which can improve                               short, namely, the extreme desire for large amounts of data limits its
+production efficiency, reduce maintenance expenses and, more impor-                             application in real-world scenarios [16]. In addition, the assumption
+tantly, avoid safety accidents [1,2]. Rolling bearings are key compo-
+                                                                                                of independent identical distribution (i.i.d.) on which these models are
+nents of rotating machinery, running under complex working condi-
+                                                                                                based requires a consistent distribution of training and test data, and
+tions of heavy load, high speed and strong impact, so various failures
+occur frequently [3,4]. Considering the critical role, both academia                            thus cannot be applied to a wider range of cross-domain tasks.
+and industry attach great importance to the research of bearing fault                               Consequently, transfer learning (TL) [17], especially domain adap-
+diagnosis [5].                                                                                  tation (DA), has been introduced to fault diagnosis under multiple or
+    Recently, intelligent diagnosis methods represented by a series of                          variable working conditions. The goal of transfer learning is to exploit
+applications of deep learning (DL) are gaining more and more atten-                             previous experiences and knowledge in order to improve learning in a
+tion [6,7]. Specifically, numerous deep networks, such as deep belief                           novel domain. Thus, numerous new fault diagnosis methods have been
+networks (DBNs) [8], convolutional neural networks (CNNs) [9,10],                               spawned to improve cross-domain generalization. For example, Wen
+recurrent neural networks (RNNs) [11], auto-encoders (AEs) [12], and                            et al. [18] proposed a new deep transfer learning for fault diagnosis
+even the latest Transformer [13,14], have been deeply investigated to                           with an AE to extract the features from raw data, and applied the
+provide excellent frameworks for fault diagnosis. These methods, with                           maximum mean discrepancy (MMD) term to minimize the discrepancy
+time-domain statistics, frequency-domain features, time–frequency do-
+                                                                                                penalty. Qian et al. [19] put forward a convolutional auto-encoder
+main graphs and even the raw signal as input, take full advantage of
+                                                                                                with deep transfer learning network (CAE-DTLN), which combines the
+deep learning, a representation learning technique, to learn discrim-
+inative representations from massive amounts of data [15]. Thereby,                             CORrelation ALignment (CORAL) loss and domain classification for
+
+
+     ∗ Corresponding author.
+       E-mail address: mpjia@seu.edu.cn (M. Jia).
+
+https://doi.org/10.1016/j.ress.2022.108890
+Received 26 May 2022; Received in revised form 3 October 2022; Accepted 6 October 2022
+Available online 12 October 2022
+0951-8320/© 2022 Elsevier Ltd. All rights reserved.
+Y. Ding et al.                                                                                                      Reliability Engineering and System Safety 230 (2023) 108890
+
+
+                                                                                           works [30,31] that carry out domain adaptation on imbalanced fault
+                                                                                           datasets all simply assume that the source and target domains have
+                                                                                           the same imbalanced distribution, completely ignoring the existence of
+                                                                                           label shift, as shown in Fig. 1(b). In addition, these studies tend to view
+                                                                                           and address imbalanced learning and domain adaptation separately,
+                                                                                           failing to integrate the two. They are essentially just variants of UDA
+                                                                                           carried out on imbalanced datasets.
+                                                                                               Therefore, this work introduces the proposition of imbalanced do-
+                                                                                           main adaptation (IDA), which assumes that label shift also exists in
+                                                                                           addition to the UDA protocol, as illustrated in Fig. 1(c). We will
+                                                                                           further detail the problem setting of IDA in the later sections. The
+                                                                                           main difficulties of IDA are as follows. (1) The mainstream DA methods
+                                                                                           for fault diagnosis can only align feature distributions, and do not
+                                                                                           help with label shift. (2) Aligning conditional probability distributions
+                                                                                           𝑝(𝑥|𝑦), 𝑞(𝑥|𝑦) is difficult when the target domain label is unknown.
+                                                                                           (3) In addition, categorical imbalance of one or both domains in the
+                                                                                           training set greatly increases the difficulty of classifier learning.
+                                                                                               To the best of our knowledge, fault diagnosis with an IDA setting,
+                                                                                           which contains both the distribution difference of features and fault
+                                                                                           modes, has not been investigated, although meets realistic needs. To
+                                                                                           fill the above-mentioned research gap, we proposed a novel deep
+                                                                                           imbalanced domain adaptation (DIDA) framework for fault diagnosis
+                                                                                           in this work, which simultaneously solve the feature shift and label
+                                                                                           shift with its specific learning algorithm. Furthermore, we provide a
+                                                                                           fault diagnosis method based on DIDA, and verify its effectiveness and
+                                                                                           superiority with experimental datasets. The main contributions of this
+                                                                                           work are as follows.
+
+                                                                                             (1) We proposed a novel DIDA framework to simultaneously solve
+Fig. 1. Domains (a) with only feature shift for UDA, (b) with feature shift and same
+                                                                                                 the challenging feature shift and label shift between source and
+imbalanced distribution, (c) with both feature shift and label shift for IDA.                    target domains for imbalanced cross-domain fault diagnosis with
+                                                                                                 complex domain differences.
+                                                                                             (2) To improve the diagnosis accuracy under variable working con-
+domain adaptation. Wang et al. [20] presented a multidiscriminator                               ditions with an IDA setting, we combined cost-sensitive re-
+deep weighted adversarial network (MDWAN) for cross-machine fault                                weighting and categorical alignment to calibrate class-
+diagnosis. Xia et al. [21] designed an intelligent fault diagnosis frame-                        imbalanced losses and narrow category-wise feature distribution
+work for machinery based on digital twin and deep transfer learning.                             discrepancy. Besides, a margin loss regularization is employed to
+Han et al. [22] extended marginal distribution adaptation to joint                               enhance decision boundaries.
+distribution adaptation (JDA), and proposed a framework to achieve                           (3) We provided a general setup for constructing IDA protocols
+a more accurate distribution matching for fault diagnosis.                                       on experimental datasets and verified the validity of our pro-
+    All these fault diagnosis studies try to extract domain-invariant                            posed DIDA accordingly. Comparison with other state-of-the-art
+representations to reduce the differences in feature distribution, namely                        methods showed the unique superiority of DIDA for IDA fault
+feature shift, due to different working conditions, as the standard un-                          diagnosis.
+supervised domain adaptation (UDA) protocol shown in Fig. 1(a).
+Although many cross-domain fault diagnosis tasks are effectively solved                       The rest of the article is arranged as follows. In Section 2, we briefly
+by such a setup, they all ignore the problem that different work-                          reviewed the related works. Then, we detailed our proposed DIDA and
+ing conditions bring not only differences in the feature distribution,                     corresponding fault diagnosis in Section 3. We carried out experimental
+𝑝(𝑥) ≠ 𝑞(𝑥), but also differences in fault modes, 𝑝(𝑦) ≠ 𝑞(𝑦). More                        case studies in Section 4. Finally, Section 5 concludes the article.
+specifically, bearings may have different frequent faults due to working
+conditions, production lots, etc., which leads to differences in fault                     2. Related works
+label distribution, namely label shift. Moreover, the manually filtered
+balanced distribution dataset used in these methods is not in line with                    2.1. Unsupervised domain adaptation
+the realistic long-tail distribution [23]. All these reasons lead to both
+severe feature and label shift, which in turn weakens the application of                        The great success of deep learning is highly dependent on the
+models trained under a specific feature and label distribution 𝑝(𝑥, 𝑦) in                  i.i.d assumption, whose performance drops sharply in the presence
+real-world scenarios with 𝑞(𝑥, 𝑦).                                                         of domain shift, i.e., the distribution gap between source and target
+    Despite a great deal of research has been done for feature shift                       domains [17]. To improve cross-domain generalization, unsupervised
+problem between two domains [24,25] and the imbalanced distribution                        domain adaptation (UDA) transfers knowledge from labeled source
+problem on a single-domain [26,27], the dilemma has rarely been                            domains to an unlabeled target domain. Representative metric-based
+investigated when both these problems arise on the source and target                       approaches learn transferable components by minimizing a statis-
+domains, a more realistic and challenging scenario. Wu et al. [28]                         tic moment serves as a regularization in objective function, such as
+reported implementation of imbalanced bearing fault diagnosis under                        MMD [32], central moment discrepancy (CMD) [33], etc. Specifically,
+variant working conditions using a cost-sensitive deep domain adapta-                      MMD defines the following metric to measure the global discrepancy
+tion network named deep Imba-DA. Tan et al. [29] proposed a mixup                          between domains
+domain adaptation network (MiDAN) for cross-domain intelligent fault
+                                                                                                       ‖ [        ]    [ ( )]‖2
+diagnosis with imbalanced datasets. These, however, and other more                         𝑑H (𝑝, 𝑞) ≜ ‖𝐸𝑝 𝜙 (𝐱𝑠 ) − 𝐸𝑞 𝜙 𝐱𝑡 ‖ ,                             (1)
+                                                                                                       ‖                       ‖H
+
+                                                                                       2
+Y. Ding et al.                                                                                                       Reliability Engineering and System Safety 230 (2023) 108890
+
+
+where H is the reproducing kernel Hilbert space (RKHS) with a char-                 3.2. Methodology overview
+acteristic kernel 𝑘. 𝐱𝑠 and 𝐱𝑡 are samples in D𝑠 and D𝑡 , respectively.
+    Generally, existing UDA methods focus on solving covariate shift or                 We proposed a novel DIDA architecture for IDA task, which contains
+feature shift, 𝑝(𝑥) ≠ 𝑞(𝑥), due to differences in data distribution, while          4 parts as shown in Fig. 2.
+assuming a consistent label distribution, 𝑝(𝑦) = 𝑞(𝑦), which in fact                    Similar to most structural risk minimization strategies, our DIDA
+ignore label shift in real scenarios. The only few studies [23,34] on IDA           starts with empirical risk minimization (ERM) to learn the mapping
+are still insufficient to adequately address the challenges of practical            X𝑠 → Y𝑠 on source domain D𝑠 ,
+engineering applications such as reliability maintenance.
+                                                                                    𝜃 ∗ = arg min 𝜖𝑠 (𝜃) = E(𝑥,𝑦)∼𝑝 L(ℎ(𝑥), 𝑦),                                             (3)
+                                                                                              𝜃
+
+2.2. Imbalanced learning                                                            where L denotes the selected loss function. Take the most commonly-
+                                                                                    used cross-entropy (CE) as an example, it is specified as a supervised
+                                                                                    classification learning in Fig. 2(a),
+    Imbalanced learning, especially imbalanced classification, has been
+                                                                                                               𝑛𝑠
+investigated extensively to alleviate the challenge of long-tailed label                                    1 ∑
+                                                                                    min L𝑠−CE (𝜃) =               L (𝑦̂ , 𝑦 )                                               (4)
+distribution in real-world large-scale datasets. When training deep                  𝜃                      𝑛𝑠 𝑖=1 CE 𝑖 𝑖
+models with imbalanced dataset, a major challenge is the dominance of
+instance-rich classes in objective function. The learned discriminative             where 𝑦̂𝑖 represents the estimated output.
+model tends to show a preference for these classes, while performing
+worse for other instance-scarce classes [35]. In general, there are two             3.3. Cost-sensitive re-weighting
+strategies: re-sampling and cost-sensitive re-weighting.
+    Re-sampling approaches directly adjust the number of samples by                       However, extensive practices have shown that learning an imbal-
+down-sampling the majority category, or over-sampling the minority                  anced dataset using basic ERM leads to severe performance degrada-
+category [36,37]. Representative methods such as synthetic minority                 tion. Specifically, due to the imbalanced distribution in label space, the
+over-sampling technique (SMOTE) [38], generate non-replicated sam-                  learned classifier tends to predict the label of frequent class rather than
+ples by interpolating. In contrast, cost-sensitive learning assigns weights         minority class to reduce the overall risk. To overcome this dilemma,
+to samples to match the given distribution, which fully utilized avail-             we introduce cost-sensitive learning with a unique class-balanced loss
+able datasets for training. For example, weighting by inverse category              (CBL) [42].
+frequency (INV) [39] or a smoothed version of square root inverse                         Given a labeled instance (𝐱, 𝑦), where the label 𝑦 ∈ {1, … , 𝐶},
+(SQINV) are usually used.                                                           assume that the predicted probabilities vector of 𝐶 classes is 𝐩 =
+                                                                                    [            ]
+    Recently, many studies also viewed imbalanced learning as a trans-                𝑝1 , … , 𝑝𝐶 , where ∀𝑖, 𝑝𝑖 ∈ [0, 1], which is usually obtained by softmax
+                                                                                                            [           ]                          ∑
+fer learning task with a label shift existing [40], although they delib-            on logits output 𝐳 = 𝑧1 , … , 𝑧𝐶 of network, 𝑝𝑖 = exp (𝑧𝑖 )∕ 𝐶   𝑗=1 exp (𝑧𝑗 ),
+erately avoid the simultaneous appearance of feature shifts. Among                  ∀𝑖 ∈ {1, … , 𝐶}. With the samples number 𝑛𝑐 for each class 𝑐, the
+the common label shift solutions, re-sampling and re-weighting after                effective number [42] is defined as,
+estimating label shift is still the dominant route [41].                                          𝑛
+                                                                                           1 − 𝛽𝑐 𝑐
+                                                                                    𝑛𝐸
+                                                                                     𝑐 =            ,                                                                       (5)
+                                                                                           1 − 𝛽𝑐
+3. Deep imbalanced domain adaptation                                                where 𝛽 ∈ [0, 1) denotes a pre-set hyperparameter which is associated
+                                                                                    with the total volume of dataset.
+3.1. Problem description                                                                For the so-called class-balance, a reweighting factor 𝛼𝑐 is then
+                                                                                    defined as the scaled inverse of the effective number for each class 𝑐,
+                                                                                    which satisfies 𝛼𝑐 ∝ 1∕𝑛𝐸
+                                                                                                            𝑐 . Concretely, for a relatively consistent scale
+    We formulate the challenging but practical setting of imbalanced
+                                                                                    of the weights 𝛼𝑐 to adapt to different dataset sizes, we define
+domain adaptation (IDA) problem as follows. Given 𝑛𝑠 labeled samples
+{ 𝑠 𝑠 } 𝑛𝑠                                      {      }
+ (𝐱𝑖 , 𝑦𝑖 ) 𝑖=1 from a source domain D𝑠 = X𝑠 , Y𝑠 , where 𝐱𝑖𝑠 ∈ X𝑠                          1      𝐶
+                                                                                    𝛼𝑐 =      ⋅ ∑𝐶       ,                                                                  (6)
+        𝑠
+and 𝑦𝑖 ∈ Y𝑠 indicate feature and label, respectively, and 𝑛𝑡 unlabeled                     𝑛𝐸
+                                                                                            𝑐       1∕𝑛𝐸
+            { } 𝑛𝑡                                                                                    𝑐=1       𝑐
+samples (𝐱𝑖𝑡 ) 𝑖=1  from a target domain D𝑡 , where the data 𝐱𝑖𝑡 ∈ X𝑡 . Note                          ∑
+                                                                                    so that satisfy 𝐶    𝑐=1 𝛼𝑐 = 𝐶.
+that we study the IDA using a setup of homogeneous transfer learning.
+                                                                                        Then, for each sample from class 𝑐, the reweighing factor (1 −
+Specifically, the feature spaces of both source and target domains
+                                                                                    𝛽)∕ (1 − 𝛽 𝑛𝑐 ) after normalized is added to the loss function L(𝐩, 𝑦),
+are semantically and dimensionally identical, X𝑠 , X𝑡 ∈ R𝑑1 ×𝑑2 ×… , but
+distributed differently. Moreover, the two domains share the same label                                          1−𝛽
+                                                                                    LCB = 𝛼𝑐 ⋅ L(𝐩, 𝑦) =                 L(𝐩, 𝑦).                                           (7)
+space {1, … , 𝐶} with 𝐶 categories, but also distributed differently due                                        1 − 𝛽 𝑛𝑐
+to the presence of categorical imbalance distribution in at least one               Note that we omit the normalized representation in the formula for
+domain. Let 𝑝, 𝑞 be the distribution in the two domains, respectively.              convenience. Take the softmax cross-entropy loss as an example, given
+Compared to common UDA with covariate shift assumption (𝑝(𝑥) ≠                      a sample with class label 𝑦, which has 𝑛𝑦 training samples, the class-
+𝑞(𝑥), 𝑝(𝑦|𝑥) = 𝑞(𝑦|𝑥)), we further assume that 𝑝(𝑥|𝑦) ≠ 𝑞(𝑥|𝑦) and                  balanced version is
+𝑝(𝑦) ≠ 𝑞(𝑦). Thus, both feature shift 𝑝(𝑥) ≠ 𝑞(𝑥) and label shift 𝑝(𝑦) ≠ 𝑞(𝑦)                                        (                  )
+                                                                                                           1−𝛽            exp (𝑧𝑦 )
+exist simultaneously, as shown in Fig. 1.                                           CBsof tmax (𝐳, 𝑦) = −          ln ∑                   .            (8)
+                                                                                                          1 − 𝛽 𝑛𝑦      𝑗=1 𝐶 exp (𝑧𝑗 )
+    Given a network ℎ𝜃 = 𝑓 ◦𝑔 parameterized by 𝜃 consists of a
+feature extractor 𝑔(⋅) and a subsequent classifier 𝑓 (⋅), IDA transfers the            With the class-balanced version loss to conduct cost-sensitive
+knowledge learned from D𝑠 to D𝑡 , which aims at minimizing the specific             reweighting, we can preliminarily solve the imbalance problem in
+task risk 𝜖𝑡 in target domain                                                       the source domain. Moreover, CBL takes full account of the sample
+                                                                                    capacity and thus provides more accurate imbalanced loss correction
+𝜃 ∗ = arg min 𝜖𝑡 = Pr (𝑥,𝑦)∼𝑞 [𝑓 (𝑔(𝑥))𝑦].                               (2)        than simple INV or SQINV.
+          𝜃
+
+                                                                                3
+Y. Ding et al.                                                                                                            Reliability Engineering and System Safety 230 (2023) 108890
+
+
+
+
+Fig. 2. Overview of the proposed DIDA, which contains (a) supervised classification, (b) cost-sensitive re-weighting, (c) categorical alignment, and (d) margin loss regularization.
+
+
+                                                                                             Algorithm 1: Training of DIDA.
+                                                                                                                                 {          }𝑛𝑠                     { }𝑛𝑡
+                                                                                                Input: Source domain D𝑠 = (𝐱𝑖𝑠 , 𝑦𝑠𝑖 ) 𝑖=1      , target domain D𝑡 = (𝐱𝑖𝑡 ) 𝑖=1 ,
+                                                                                                         batch size 𝑛𝑏 .
+                                                                                              1 Initialize network ℎ𝜃 = 𝑓 ◦𝑔;
+                                                                                              2 Compute 𝛼𝑐 for each class 𝑐 with Eq. (5) - (6);
+                                                                                              3 for epoch=1,2,. . . ,max_epoch do
+                                                                                              4      Update trade-off factors 𝜆𝑡 ;
+                                                                                              5      for each batch (𝑋 𝑠 , 𝑌 𝑠 ), (𝑋 𝑡 ) in both domains do
+                                                                                              6           Get hidden features 𝐻 𝑠 = 𝑔(𝑋 𝑠 ), 𝐻 𝑡 = 𝑔(𝑋 𝑡 );
+                                                                                              7           Get logits vectors 𝑍 𝑠 = 𝑓 (𝐻 𝑠 ), 𝑍 𝑡 = 𝑓 (𝐻 𝑡 );
+                                                                                              8           Target Softmax probabilities 𝑃 𝑡 = Sof tmax(𝑍 𝑡 );
+                                                                                              9           Compute category weights 𝑤𝑐𝑖 with Eq. (11);
+                                                                                             10           Estimate distance 𝑑̂LMMD (𝐻 𝑠 , 𝐻 𝑡 ) with Eq. (12);
+                                                                                             11           Compute CBCE loss L𝑠 (D𝑠 ; 𝜃) with Eq. (18);
+                                                                                             12           Overall objective LDIDA (D𝑠 , D𝑡 ; 𝜃) with Eq. (17);
+                                                                                             13           Error backward and update ℎ𝜃 with ∇𝜃 LDIDA ;
+           Fig. 3. Decision boundary and margins for binary classification.
+                                                                                             14      end
+                                                                                             15 end
+                                                                                                Output: Optimal network parameters 𝜃 ∗ .
+3.4. Categorical alignment
+
+   Based on imbalanced supervised learning, making full use of un-
+labeled data in the target domain requires semantic-based domain                                Finally, the estimated LMMD on hidden feature 𝐡𝑖 = 𝑔(𝐱𝑖 ) is
+adaptation, namely, aligning the category-wise feature space of both                                         [𝑛 𝑛
+                                                                                                                           (         )
+                                                                                                       1 ∑ ∑ ∑ 𝑠𝑐 𝑠𝑐
+                                                                                                          𝐶     𝑠  𝑠
+domains. Categorical alignment, on the one hand, has better fine-                             ̂
+                                                                                             𝑑LMMD =                 𝑤 𝑤 𝑘 𝐡𝑠𝑖 , 𝐡𝑠𝑗
+grained alignment than global domain adaptation, and on the other                                      𝐶 𝑐=1 𝑖=1 𝑗=1 𝑖 𝑗
+hand, its category-wise nature can avoid the effect of class imbalance.                                             𝑛𝑡 𝑛𝑡            (        )
+                                                                                                                    ∑  ∑
+Unlike the previous CBL that only corrects the class-imbalanced loss on                                         +             𝑤𝑡𝑐 𝑡𝑐   𝑡 𝑡
+                                                                                                                               𝑖 𝑤𝑗 𝑘 𝐡𝑖 , 𝐡𝑗                                   (12)
+the source domain, it is the core of solving both the feature shift and                                             𝑖=1 𝑗=1
+                                                                                                                                                  ]
+label shift between domains.                                                                                          𝑛𝑠 𝑛𝑡
+                                                                                                                     ∑∑               (        )
+   Here we introduce the local maximum mean discrepancy (LMMD)                                                  −2             𝑤𝑠𝑐 𝑡𝑐   𝑠 𝑡
+                                                                                                                                𝑖 𝑤𝑗 𝑘 𝐡𝑖 , 𝐡𝑗   ,
+[43] to align the categorical distribution of two subdomains,                                                        𝑖=1 𝑗=1
+
+         ‖     [     ]        [      ]‖2                                                     where 𝑘(⋅, ⋅) denotes the kernel 𝑘(𝑎, 𝑏) = ⟨𝜙(𝑎), 𝜙(𝑏)⟩.
+𝑑H ≜ E𝑐 ‖E𝑝(𝑐) 𝜙(𝐱𝑠 ) − E𝑞 (𝑐) 𝜙(𝐱𝑡 ) ‖ ,                            (9)
+         ‖                            ‖H
+                                                                                             3.5. Margin loss regularization
+where 𝑝(𝑐) and 𝑞 (𝑐) denote distribution of D𝑠(𝑐) and D𝑡(𝑐) , namely, subsets
+of category 𝑐 in two domains, respectively. Different from MMD mea-
+                                                                                                 Cost-sensitive re-weighting and categorical alignment help the net-
+sures the global distribution distance, LMMD focus on the expectation
+                                                                                             work to learn domain-invariant representations from imbalanced cross-
+of local distance in each category, namely category-wise MMD. By
+assuming each sample belongs to each category with a weight 𝑤𝑐 , we                          domains, but the categorical decision boundaries based on these fea-
+get the empirical estimation of LMMD,                                                        tures are still fragile due to the uneven label distribution. A common
+                                                                                             idea is to regularize the instance-scarce category more strongly than
+         𝐶 ‖                                  ‖2
+      1 ∑   ‖ ∑
+            ‖         𝑠𝑐
+                         ( 𝑠 ) ∑ 𝑡𝑐 ( 𝑡 )‖    ‖
+                                                                                             the instance-rich ones to further improve the generalization of minority
+𝑑̂H =       ‖        𝑤𝑖 𝜙 𝐱𝑖 −        𝑤𝑗 𝜙 𝐱𝑗 ‖ ,                                (10)        category. However, how to regularize it without sacrificing the fitting
+      𝐶 𝑐=1 ‖
+            ‖𝐱𝑖𝑠 ∈D𝑠            𝑡
+                                              ‖
+                                              ‖
+            ‖                  𝐱𝑗 ∈D𝑡
+                                              ‖H                                             of frequent category is a challenging task.
+                                                                                                 Now we start with the perspective of margin. Take the binary
+where 𝑤𝑠𝑐          𝑡𝑐
+         𝑖 and 𝑤𝑗 represent the possibility  of samples 𝑥𝑠𝑖 and 𝑥𝑡𝑗 belong-
+                                           ∑𝑛𝑠 𝑠𝑐            ∑ 𝑛𝑡                            classification as an example, the margin 𝛾𝑐 of the 𝑐th class is defined
+ing to class 𝑐, respectively, which satisfy 𝑖=1 𝑤𝑖 = 1 and 𝑗=1      𝑤𝑡𝑐
+                                                                      𝑗] = 1.
+                                                           [ 1                               as the minimum distance of samples in 𝑐th category to the decision
+For each sample 𝐱𝑖 , with a probabilities vector 𝐩𝑖 = 𝑝𝑖 , … , 𝑝𝐶    𝑖 , we                  boundary, as shown in Fig. 3. We try to encourage the minority class
+compute the weight 𝑤𝑐𝑖 as,                                                                   to have larger margins without reducing the generalization of majority
+            𝑝𝑐𝑖                                                                              class. By fixing the margins distance as 𝛾1 + 𝛾2 , the optimal trade-off is
+𝑤𝑐𝑖 = ∑          𝑐
+                     ,                                                           (11)               −1∕4
+                                                                                             𝛾𝑐 ∝ 𝑛𝑐 , where 𝑛𝑐 is the number of 𝑐th class instances.
+          𝐱𝑗 ∈D 𝑝𝑗
+                                                                                                 Consider further the classification of 𝐶 classes. Suppose D𝑐 is the
+where 𝑝𝑐𝑖 is the 𝑐th entry in 𝐩𝑖 . Note that for a labeled sample from D𝑠 ,                  subset of class 𝑐, we can define the margin of a given instance (𝐱, 𝑦) as
+𝐩𝑖 can be viewed as the one-hot vector, while for unlabeled one from D𝑡 ,
+it is the output predicted distribution of the network as a pseudo-label.                    𝛾 (𝐱, 𝑦) = ℎ (𝐱)𝑦 − max ℎ𝜃 (𝐱)𝑗 ,                                                  (13)
+                                                                                                                    𝑐≠𝑦
+
+
+                                                                                         4
+Y. Ding et al.                                                                                                                 Reliability Engineering and System Safety 230 (2023) 108890
+
+
+
+
+                                                          Fig. 4. The workflow illustration of the proposed fault diagnosis with DIDA.
+
+
+and then the training margin for class 𝑗 is                                                        3.6.2. Optimization algorithm
+            (     )                                                                                   We provide the specific optimization algorithm for DIDA in Al-
+𝛾𝑐 = min 𝛾 𝐱𝑖 , 𝑦𝑖 .                                                                   (14)        gorithm 1. Please note in the practical optimization, we employ a
+      (𝐱,𝑦)∈D𝑐
+                                                                                                   time-varying trade-off 𝜆𝑡 = 𝜇 ⋅ (2∕(1 + 𝑒−10𝑡∕𝑡𝑚 ) − 1) instead of a fixed
+Accordingly, we get the minimum margin for all the classes as 𝛾min =
+    {          }                                                                                   value, where 𝑡, 𝑡𝑚 denote current and maximum epochs, respectively.
+min 𝛾1 , … , 𝛾𝐶 .                                                                                  Thus it allows the network to focus on gaining from supervised learning
+   An optimal class-dependent margin for multiple categories with the                              to learn effective representations in the early stages, while placing
+             𝐾
+form 𝛾𝑐 = 1∕4   is deduced in Ref. [41], where 𝐾 is a pre-set constant.                            more emphasis on improving cross-domain generalization in the later
+                 𝑛𝑐
+Then a label-distribution-aware margin (LDAM) loss that encourages                                 stages. This is in line with the fact that the network needs basic
+the network to have this margin is designed as,                                                    categorization accuracy on the source domain before performing the
+                     { }                                                                           semantic alignment.
+LLDAM−HG = max(max 𝑧𝑐 − 𝑧𝑦 + 𝛥𝑦 , 0),
+                             𝑐≠𝑦
+                                    𝐾                                                  (15)        3.7. DIDA for fault diagnosis
+             where 𝛥𝑐 =                   for 𝑐 ∈ {1, … , 𝐶} .
+                                    1∕4
+                                   𝑛𝑐
+                                                                                                      Applying the DIDA to fault diagnosis, we use 1D-ResNet as its back-
+Empirically, the non-smoothness characteristic of hinge loss makes it
+                                                                                                   bone and input multi-channel time-domain vibration signals of bear-
+difficult to optimize. Thus, a smoothed version is given as a cross-                               ings. A single linear layer with softmax activation follows. Specifically,
+entropy loss with enforced margins,                                                                the implementation steps of diagnosis are as follows.
+                        𝑒𝑧𝑦 −𝛥𝑦
+LLDAM = − ln                ∑         ,                                                               (1) Dataset preparation: Collect multi-channel vibration signals of
+                       𝑧𝑦 −𝛥𝑦
+                   𝑒     + 𝑐≠𝑦 𝑒𝑧𝑐                                                                        bearings with different fault modes, and establish labeled source
+                                                                                       (16)
+                              𝐾                                                                           dataset D𝑠 , unlabeled target dataset D𝑡 and test dataset D𝑡𝑒𝑠𝑡 .
+                 where 𝛥𝑐 =        for 𝑐 ∈ {1, … , 𝐶} .
+                               1∕4
+                             𝑛𝑐                                                                       (2) Network initialization: Construct a deep network ℎ𝜃 parameter-
+                                                                                                          ized with random 𝜃, which contains a 1D-ResNet backbone 𝑔(⋅)
+    This label-dependent regularization is orthogonal to the previous
+                                                                                                          and a linear classifier 𝑓 (⋅).
+re-weighting, namely, they can be used simultaneously for imbal-
+                                                                                                      (3) DIDA training: Train the initialized ℎ𝜃 with cross-domain
+ance learning, thus both contributing to better imbalanced generaliza-
+                                                                                                          datasets D𝑠 and D𝑡 using the DIDA algorithm.
+tion [41].
+                                                                                                      (4) Test inference: Classify the test dataset with the optimized ℎ∗𝜃 .
+                                                                                                          Analysis and discuss the test results.
+3.6. DIDA optimization
+                                                                                                   This framework for fault diagnosis is also shown in Fig. 4.
+
+3.6.1. Objective function                                                                          4. Experiment
+    Our proposed DIDA combines the above features and thus achieves
+fine-grained information alignment and domain adaptation over long-                                4.1. Experiment setup
+tailed distributed domains. In summary, the overall objective function
+is                                                                                                 4.1.1. IDA protocol
+                                                                                                       To simulate the naturally distributed IDA datasets, we sub-sample
+LDIDA (D𝑠 , D𝑡 ; 𝜃) = L𝑠 (D𝑠 ; 𝜃) + 𝜆 ⋅ 𝑑̂LMMD (D𝑠 , D𝑡 ; 𝜃),                          (17)        existing balanced UDA datasets with a Pareto distribution [44], whose
+                                                                                                   discrete form called Zeta distribution is
+where
+                                                                                                                  1
+L𝑠 (D𝑠 ; 𝜃) = 𝛼𝑐 ⋅ LLDAM−CE                                                                        𝑃 (𝑋 = 𝑘) = 𝛼       , 𝑘 = 1, 2, … ,
+                                                                                                                𝑘 𝜁(𝛼)
+                         𝑛
+                      1 ∑ 1−𝛽                                                                                    ∑ 1                                                (19)
+                           𝑠                                                           (18)                       ∞
+                                               𝑒𝑧𝑖 −𝛥𝑖
+           =−                      𝑛
+                                       ln 𝑧 −𝛥 ∑                                                   where 𝜁(𝛼) =          , 𝛼 > 1.
+                      𝑛𝑠 𝑖=1 1 − 𝛽   𝑐   𝑒 𝑖 𝑖 + 𝑐≠𝑦 𝑒𝑧𝑐                                                             𝑘 𝛼
+                                                          𝑖                                                      𝑘=1
+
+denotes the class-balanced cross-entropy (CBCE) with an LDAM regu-                                 We pre-set 𝛼 = 1.1 and formulated 4 protocols from source domain
+larization. 𝜆 stands for the trade-off factor.                                                     to target domain: (1) B2B: Balanced Source → Balanced Target, (2)
+
+                                                                                               5
+Y. Ding et al.                                                                                          Reliability Engineering and System Safety 230 (2023) 108890
+
+                 Table 1
+                 Hyperparameters and implementation details of DIDA.
+                  Item                               Value
+                  Backbone                           1D-ResNet-18
+                  Batch size                         32
+                  Max epoch                          50
+                  Learning rate                      1e−3
+                  Weight decay                       1e−3
+                  Label smoothing 𝜀                  0.1
+                  Class-balanced factor 𝛽            0.99
+                  Trade-off factor 𝜇                 0.05
+
+
+
+
+B2I: Balanced Source → Imbalanced Target, (3) I2B: Imbalanced Source                 Fig. 5. The ABLT-1 A experimental platform and test 6205 bearings.
+→ Balanced Target, (4) I2I: Imbalanced Source → Imbalanced Target.
+Except for B2B, where only feature shift exists, the other three have
+both feature shift and label shift. Note that I2I employs a reversely-
+unbalanced Source and Unbalanced Target (RSUT) protocol [34] to
+simulate extreme label shift. Thus, they represent scenarios from none
+to progressively larger label shift, respectively.
+
+
+4.1.2. Implementation details
+    We selected 1D-ResNet-18 as the backbone, namely, the feature
+extractor 𝑓 (⋅), for its good characterization ability and lightweight.
+Weight decay and label smoothing are employed to improve conver-
+gence and enhance generalization and robustness. In addition, several
+1D signal data augmentations are utilized to improve the data richness,
+including Gaussian noise, mask noise, time stretch, and amplitude
+scale. See Ref. [3] for augmentation details. The hyperparameters were
+determined by grid search and cross-validation, as shown in Table 1.
+In fact, except for 𝛽 and 𝜇, all other hyperparameters are optimization               Fig. 6. Samples of different fault modes collected from ABLT-1 A.
+or dataset related, which also shows that the proposed DIDA relies on
+few hyperparameters to be determined and is thus easy to implement.
+                                                                                         • Qian’s CAE-DTLN [19]: a transfer convolutional
+4.1.3. Baseline & comparison methods                                                       auto-encoder with both CORrelation ALignment (CORAL)
+                                                                                           loss and domain classification loss for cross-domain fault
+    To highlight the performance of our DIDA, we construct a baseline
+                                                                                           diagnosis.
+with the same 1D-ResNet-18 backbone and the same implementation
+                                                                                         • Han’s DTN-JDA [22]: a deep transfer network with joint
+hyperparameters, but without all the IDA-specific points, namely, using
+                                                                                           domain adaptation for fault diagnosis.
+only the supervised learning objective function in Eq. (4).
+                                                                                         • Tan’s MiDAN [29]: a framework for cross-domain intelli-
+    In addition, several state-of-the-art approaches for comparison are
+                                                                                           gent fault diagnosis with imbalanced datasets.
+listed, including the following three categories.
+                                                                                         • Wu’s Imba-DA [28]: an imbalanced bearing fault diagnosis
+   (a) Deep learning methods for fault diagnosis:                                          method under variant working conditions.
+
+             • Chen’s CNN [10]: an effective CNN based on LeNet-5 to                 These cross-domain fault diagnosis methods are conducted with
+               learning features for fault diagnosis.                                settings given in references.
+             • Mao’s AE [12]: a deep auto-encoder method with a new
+               loss function for fault diagnosis.                             4.2. Case study on self-built bearing fault datasets
+             • Chen’s MSCNN-LSTM [11]: a framework based on multi-
+               scale CNN and LSTM to utilize raw vibration signals as         4.2.1. Dataset description
+               inputs for fault diagnosis.                                        We collect signals of 6205 rolling bearings with different fault
+                                                                              modes on the ABLT-1 A experimental platform, as shown in Fig. 5. The
+       We implement these DL methods to our IDA case studies with             vibration signals are sampled with the triaxial acceleration sensors with
+       the suggested settings.                                                a sampling frequency of 12 800 Hz, which are mounted in the vertical
+   (b) Unsupervised domain adaptation approaches:                             direction on the bearing blocks. Under zero-load conditions, 6 types of
+                                                                              fault modes are simulated, i.e., normal (N), inner ring fault (IRF), outer
+             • DAN [32]: the most representative metric-based UDA
+                                                                              ring fault (ORF), ball fault (BF), inner and outer ring compound fault
+               method, which narrows the multi-kernel MMD.
+                                                                              (IORF), and outer ring and ball compound fault (ORBF), as shown in
+             • DANN [45]: a commonly used baseline UDA method based
+                                                                              Fig. 6. All of these types run at 4 different speeds to simulate different
+               on adversarial training.
+                                                                              operating conditions, i.e., (A) 1200 rpm, (B) 1500rpm, (C) 1750rpm
+       These methods are implemented in combination with the base-            and (D) 2000rpm. Each segment of the sample was cut to a length of
+       line network, using the suggested hyperparameters.                     2400, and a total of 4 × 6 × 1000 = 24 000 samples were collected.
+   (c) Latest solutions for cross-domain fault diagnosis:
+                                                                              4.2.2. IDA task setup
+             • Wen’s TCNN [25]: a deep transfer convolutional network            The samples under each operating condition are mixed to form a
+               based on the ResNet50 for fault diagnosis.                     subset, of which 20% are used as the test set and the rest as the training
+
+                                                                          6
+Y. Ding et al.                                                                                                            Reliability Engineering and System Safety 230 (2023) 108890
+
+
+
+
+                              Fig. 7. Source and target training sets distribution of protocols (a) B2I, (b) I2B, (c) I2I using self-built datasets.
+
+
+                      Table 2
+                      All the scenarios with different case task setup & IDA protocols using self-build datasets.
+                       Case                     Source                     Target                      Feature shift                  IDA protocols
+                       B→C                      1500 rpm                   1750 rpm                    Slight                         B2B, B2I, I2B, I2I
+                       C→B                      1750 rpm                   1500 rpm                    Slight                         B2B, B2I, I2B, I2I
+                       A→C                      1200 rpm                   1750 rpm                    Moderate                       B2B, B2I, I2B, I2I
+                       C→A                      1750 rpm                   1200 rpm                    Moderate                       B2B, B2I, I2B, I2I
+                       A→D                      1200 rpm                   2000 rpm                    Large                          B2B, B2I, I2B, I2I
+                       D→A                      2000 rpm                   1200 rpm                    Large                          B2B, B2I, I2B, I2I
+
+
+                      Table 3
+                      DIDA accuracy (%) mean ± std of fault diagnosis case studies on self-built datasets.
+                       Case             B2B                       B2I                       I2B                   I2I                     Avg.
+                       B→C              100.00 ± 0.00             99.43 ± 0.77              98.33 ± 2.68          95.76 ± 1.67            98.38 ± 1.28
+                       C→B              100.00 ± 0.00             99.71 ± 1.22              96.78 ± 2.55          94.88 ± 2.78            97.84 ± 1.64
+                       A→C              100.00 ± 0.00             98.75 ± 2.13              95.44 ± 0.43          93.13 ± 0.75            96.83 ± 0.83
+                       C→A              100.00 ± 0.00             97.49 ± 2.30              93.65 ± 2.88          92.58 ± 3.05            95.93 ± 2.06
+                       A→D              99.85 ± 0.45              97.18 ± 0.84              93.54 ± 2.90          90.13 ± 2.11            95.17 ± 1.58
+                       D→A              98.33 ± 1.25              98.65 ± 2.11              92.12 ± 2.98          91.43 ± 2.98            95.63 ± 2.33
+                       Avg.             99.70 ± 0.28              98.53 ± 1.56              94.98 ± 2.40          92.99 ± 2.22            96.55 ± 1.63
+
+
+                      Table 4
+                      Baseline accuracy (%) mean ± std of fault diagnosis case studies on self-built datasets.
+                       Case              B2B                     B2I                        I2B                   I2I                     Avg.
+                       B→C               98.31 ± 1.36            96.67 ± 3.05               91.68 ± 3.29          88.33 ± 2.55            93.75 ± 2.56
+                       C→B               99.63 ± 0.27            90.33 ± 2.53               91.67 ± 2.71          90.59 ± 2.83            93.05 ± 2.09
+                       A→C               95.35 ± 2.21            95.76 ± 3.24               85.21 ± 4.06          86.63 ± 7.07            90.74 ± 4.12
+                       C→A               91.14 ± 2.98            91.08 ± 1.79               88.31 ± 2.78          82.93 ± 3.67            88.37 ± 2.80
+                       A→D               94.45 ± 1.83            90.61 ± 2.74               85.20 ± 5.15          81.90 ± 5.16            88.04 ± 3.72
+                       D→A               85.86 ± 1.99            84.63 ± 3.18               71.32 ± 1.58          63.68 ± 3.38            76.37 ± 2.53
+                       Avg.              94.12 ± 1.76            91.51 ± 2.75               85.56 ± 3.26          82.34 ± 4.11            88.39 ± 2.97
+
+
+
+set. The training set then needs to be filtered to form the specified                        up to the tough IDA task, especially when the source domain dataset
+distribution. The distribution of the 3 protocols containing imbalanced                      is imbalanced (I2B & I2I) its performance degradation is unacceptable.
+training set is shown in Fig. 7.                                                             This seems to indicate that the extremely harsh label shift in our task
+    Then, we set up six case tasks based on the above four subsets, as                       setup is more challenging than the involved feature shift.
+shown in Table 2, representing situations with slight, moderate and                              Further, we provide the feature visualization of I2I protocol in
+large differences in operating conditions (feature shift), where each                        Fig. 8, which is plotted with the extracted hidden representation 𝑔(𝐱)
+case performs all four IDA protocols, forming a total of 24 scenarios.                       after dimensionality reduction of t-distributed stochastic neighbor em-
+                                                                                             bedding (t-SNE). In addition to DIDA and the baseline, DAN [32]
+4.2.3. Results & analysis                                                                    is also shown as a representative of conventional DA. Observing the
+   We conducted all six case studies with four IDA protocols, and each                       features extracted with the baseline in Fig. 8(a), samples from different
+scenario was repeated 10 times. Table 3 lists all the average results for                    domains show a separation trend. Although the samples of different
+case studies with DIDA, in which we also counted the average accuracy                        categories are not difficult to distinguish, the samples from different
+of DIDA in each IDA protocol or transfer case. Same case studies with                        domains show completely different distributions due to the feature shift
+the baseline are listed in Table 4.                                                          and the extremely large label shift, which significantly weakens the
+   As can be seen in Table 3, DIDA obtained satisfactory results in all                      generalization of baseline on the target domain. When using traditional
+scenarios, with an average accuracy of 96.55%. The diagnosis results                         DAN, the learned features are slightly better than baseline, as evidenced
+are satisfactory in all scenarios, considering that IDA is more challeng-                    by the fact that categories with a similar number of samples can be well
+ing than traditional UDA. Even with extremely large feature shift and                        aligned (BF and ORF), while other categories are severely challenged
+label shift (A↔D-I2I), our DIDA still has an acceptable classification                       by the imbalanced distribution, as shown in Fig. 8(b). In contrast, as
+accuracy higher than 90%.                                                                    shown in Fig. 8(c), samples with the same fault mode are clustered,
+   Generally, our DIDA adapts well to scenarios with different feature                       while samples with different fault modes are kept away from each
+and label shift. In contrast, the baseline without DIDA is clearly not                       other, validating DIDA’s ability to learn effective representations from
+
+                                                                                        7
+Y. Ding et al.                                                                                                            Reliability Engineering and System Safety 230 (2023) 108890
+
+Table 5
+Selected samples with 10 types from CWRU datasets.
+                                                                               Fault diameter
+ Condition                Load (HP)                Speed (rpm)
+                                                                               /                Small                          Medium                             Large
+ A                        0                        1797                        N                SIRF, SBF, SORF                MIRF, MBF, MORF                    LIRF, LBF, LORF
+ B                        3                        1730                        N                SIRF, SBF, SORF                MIRF, MBF, MORF                    LIRF, LBF, LORF
+
+
+
+
+                                                                                                Fig. 9. Accuracy (%) of fault diagnosis using DIDA with different IDA protocols.
+
+
+
+
+                                                                                              in the source domain, thus posing the following challenges: (1) the
+                                                                                              imbalanced distribution of labeled datasets greatly increases the dif-
+                                                                                              ficulty of supervised learning, and (2) fewer labeled data increases
+                                                                                              the risk of over-parameterization of the network. Ultimately, I2I uses
+                                                                                              reverse imbalance distributions in the source and target domains, cre-
+                                                                                              ating extremely large label shift and thus suffering from all these
+                                                                                              aforementioned challenges.
+                                                                                                  (2). The degree of feature shift also affects the results. This point is
+                                                                                              actually obvious and has been reflected in many previous studies with
+                                                                                              only feature shift. The six transfer cases we constructed represent a
+                                                                                              different degree of feature shift, due to the different variability of the
+                                                                                              bearing operating conditions. The performance of the two cases with
+                                                                                              the largest feature differences in the B2B protocol is slightly inferior to
+                                                                                              other four cases. This phenomenon persists when both label shift and
+                                                                                              feature shift are present, namely a larger feature shift further reduces
+                                                                                              the accuracy that is already weakened by the label shift.
+
+Fig. 8. Hidden representation visualization of I2I protocol on self-built datasets with       4.3. Case study on CWRU bearing fault datasets
+(a) the baseline, (b) the DAN, and (c) proposed DIDA. Note that the left figures are
+with the fault labels, while the right ones are with the domain labels.
+                                                                                              4.3.1. Dataset description
+                                                                                                   The CWRU rolling bearing dataset is a well-known public bench-
+                                                                                              mark dataset provided by the Bearing Data Center of Case Western Re-
+imbalanced datasets. In addition, the differences in feature distributions
+                                                                                              serve University (CWRU). The dataset collects bearing vibration signals
+between the source and target domains are significantly reduced and,                          of different failure modes under various operating conditions. We se-
+in particular, samples of the same category from different domains are                        lected data with a sampling frequency of 12 kHz for the supplementary
+well aligned, suggesting that DIDA learns domain-invariant representa-                        case study.
+tions. To sum up, DIDA not only extracts discriminative features with                              To validate the classification performance with multiple categories,
+respect to fault modes, but also narrows the distribution discrepancy                         we composed a total of 9 fault classes with 3 different fault modes,
+between source and target domains to overcome both feature shift and                          i.e., inner ring fault (IR), ball fault (BF), outer ring fault (ORF), and
+label shift.                                                                                  3 different fault diameters, i.e., 0.007 inch (S: small), 0.014 inch (M:
+    Further, we plot the results of DIDA in Fig. 9 and obtained the                           medium), 0.021 inch (L: large). Considering the small speed differences
+following findings.                                                                           in the dataset, 2 working conditions with the largest differences were
+    (1). Different IDA protocols greatly affect generalization. In B2B pro-                   selected for the case study. Note that due to the smaller scale of CWRU
+tocol there is only feature shift and not label shift, thus our DIDA                          dataset, we obtained more samples by sliding window. Finally, with
+obtains the best generalization under this protocol and even achieves                         normal samples included, we list the 10 types of samples under 2
+100% across-domain prediction accuracy in some cases. The B2I proto-                          working conditions in Table 5.
+col introduces an imbalanced distribution in the target domain, thus
+causing a label shift between the source and target domains, which                            4.3.2. IDA task setup
+slightly increases the difficulty of prediction, possibly due to the im-                          We used the same IDA protocols to set the test tasks for the CWRU
+balanced distribution construction (1) reduces the size of available                          dataset. The distributions and sample sizes for the different IDA proto-
+samples, and (2) hinders the estimation of feature distribution in the                        cols are shown in Fig. 10. Combining the 2 case tasks, there are a total
+target domain. In contrast, I2B introduces an imbalanced distribution                         of 8 scenarios, as shown in Table 6.
+
+                                                                                          8
+Y. Ding et al.                                                                                                           Reliability Engineering and System Safety 230 (2023) 108890
+
+                 Table 6
+                 All the scenarios with different case task setup & IDA protocols using CWRU datasets.
+                  Case                  Source                                              Target                                           IDA protocols
+                                        Load                   Speed                        Load                 Speed
+                  A→B                   0 HP                   1797 rpm                     3 HP                 1730 rpm                    B2B, B2I, I2B, I2I
+                  B→A                   3 HP                   1730 rpm                     0 HP                 1797 rpm                    B2B, B2I, I2B, I2I
+
+
+                 Table 7
+                 DIDA accuracy (%) mean ± std of fault diagnosis case studies on CWRU datasets.
+                  Case               B2B                        B2I                         I2B                       I2I                           Avg.
+                  A→B                96.30 ± 2.65               95.66 ± 2.67                86.87 ± 3.41              87.25 ± 3.62                  91.52 ± 3.09
+                  B→A                98.62 ± 3.02               93.67 ± 2.07                89.75 ± 2.68              71.62 ± 2.63                  88.41 ± 2.60
+                  Avg.               97.46 ± 2.84               94.67 ± 2.37                88.31 ± 3.05              79.75 ± 3.13                  90.05 ± 2.84
+
+
+
+
+                                Fig. 10. Source and target training sets distribution of protocols (a) B2I, (b) I2B, (c) I2I using CWRU datasets.
+
+
+                                                                                            4.3.3. Results & analysis
+                                                                                                 All scenarios were repeatedly trained and tested 10 times. Then, the
+                                                                                            results of DIDA on the CWRU dataset are shown in Table 7. The results
+                                                                                            show that the proposed DIDA still works well on the CWRU dataset
+                                                                                            with 10 categories. In addition, similar to the previous case study, DIDA
+                                                                                            performance varies on different IDA tasks. Specifically, the tasks with
+                                                                                            imbalanced datasets as the source domain of the training set, i.e., I2B
+                                                                                            and I2I, are more challenging. Differently, this performance difference
+                                                                                            is greater on the CWRU dataset than that on the self-built dataset,
+                                                                                            perhaps because more categories increase the difficulty of imbalanced
+                                                                                            classification. The distribution of extracted features also shows this
+                                                                                            difference, as plotted in Fig. 11. More categories in the CWRU dataset,
+                                                                                            i.e., multiple failure modes with varying degrees, present a significant
+                                                                                            challenge for classification with the I2I protocol. The features extracted
+                                                                                            by the baseline are more difficult to distinguish between classes with
+                                                                                            the same fault mode but different degrees. In addition, it seems that
+                                                                                            label shift in the CWRU datasets creates more trouble than feature
+                                                                                            shift for learning discriminative features, thus even different classes of
+                                                                                            samples in the source domain appear to be confounded. DAN obtains
+                                                                                            better results than baseline, but extraction of domain-invariant features
+                                                                                            on categories with large differences in number is still not satisfactory.
+                                                                                            However, the proposed DIDA overcomes the challenge of larger label
+                                                                                            shift on CWRU datasets, and extracts more generalizable features with
+                                                                                            the I2I protocol.
+
+                                                                                            4.4. Comparison with state-of-the-art
+
+                                                                                                By conducting case studies on both the self-built and CWRU
+                                                                                            datasets, comparison results of DIDA and various state-of-the-art meth-
+                                                                                            ods are shown in Table 8. Overall, the proposed DIDA obtained a
+                                                                                            significantly better prediction accuracy than the other methods. Specif-
+                                                                                            ically, we find that traditional deep learning models are completely
+                                                                                            unsuitable for the difficult IDA task due to the presence of label shift
+                                                                                            in addition to feature shift.
+Fig. 11. Hidden representation visualization of I2I protocol on CWRU datasets with              Various domain adaptation methods and cross-domain diagnosis
+(a) the baseline, (b) the DAN, and (c) proposed DIDA. Note that the left figures are
+                                                                                            methods perform relatively better, especially in B2B and B2I protocols,
+with the fault labels, while the right ones are with the domain labels.
+                                                                                            given their ability to significantly reduce feature distances. However,
+
+                                                                                        9
+Y. Ding et al.                                                                                                             Reliability Engineering and System Safety 230 (2023) 108890
+
+Table 8
+Dataset accuracy (%) of comparison with State-of-the-art.
+ Method                    Self-built dataset                                                         CWRU dataset                                                       Total avg.
+                           B2B           B2I          I2B           I2I        Avg.                   B2B        B2I             I2B            I2I         Avg.
+ CNN [10]                  89.67         88.82        86.47         78.13      85.77                  86.52      82.10           67.54          61.31       74.37        80.07
+ AE [12]                   92.32         90.58        84.00         79.47      86.59                  91.97      85.46           65.28          59.55       75.57        81.08
+ MSCNN-LSTM [11]           94.51         90.87        86.17         81.64      88.30                  93.17      88.45           68.46          62.64       78.18        83.24
+ DAN [32]                  97.19         91.83        87.02         80.44      89.12                  95.74      90.42           72.81          64.16       80.78        84.95
+ DANN [45]                 98.54         92.15        89.64         82.37      90.68                  95.91      90.57           73.14          65.43       81.26        85.97
+ TCNN [25]                 98.94         95.15        87.95         81.15      90.80                  95.53      91.21           72.85          66.45       81.51        86.15
+ DTN-JDA [22]              99.67         96.17        90.42         83.41      92.42                  97.44      94.38           74.33          67.14       83.32        87.87
+ CAE-DTLN [19]             99.72         95.61        89.53         82.15      91.75                  98.10      93.04           76.21          65.81       83.29        87.52
+ MiDAN [29]                99.68         97.51        92.16         84.88      93.56                  97.62      94.17           81.64          71.90       86.33        89.95
+ Imba-DA [28]              99.75         98.04        91.83         86.67      94.07                  97.44      93.18           84.12          72.61       86.84        90.46
+ DIDA                      99.70         98.53        94.98         92.99      96.55                  97.46      94.67           88.31          79.75       90.05        93.30
+
+
+                                   Table 9
+                                   Accuracy (%) of ablation studies on DIDA.
+                                    Case                    B2B              B2I                I2B                  I2I                 Avg.
+                                    DIDA                    99.70            98.53              95.31                92.99               96.63
+                                    AB-1                    99.73            97.78              92.69                88.18               94.59
+                                    AB-2                    94.31            92.42              90.05                86.53               90.83
+                                    AB-3                    98.70            94.21              89.68                84.82               91.85
+                                    Baseline                94.12            91.51              85.56                82.34               88.39
+
+
+
+
+                                   Fig. 12. DIDA performance with different values of (a) class-balanced factor 𝛽, and (b) trade-off factor 𝜇.
+
+
+the imbalanced data distribution and label shift between source and                         4.5.1. Ablation study
+target domains make them suffer from challenges. The accuracy of                                Understanding the action mechanism of our DIDA requires us to
+those methods that do not purposefully consider the imbalance distri-                       analyze the impact of each core part on performance, i.e., margin loss
+bution has almost degraded to the level of traditional deep learning                        regularization, semantic alignment, cost-sensitive re-weighting. Thus,
+methods in I2I protocol, indicating that traditional domain adaptations                     here we remove these key parts of DIDA for ablation study, and form
+are also not applicable to IDA scenarios. In contrast, even methods                         the following variants.(1) AB-1: DIDA w/o (without) margin loss regu-
+that only consider imbalanced label distribution rather than label shift,                   larization, (2) AB-2: DIDA w/o semantic alignment, (3) AB-3: DIDA w/o
+i.e., MiDAN, Imba-Da, perform much better, especially in I2B and I2I                        cost-sensitive re-weighting. In addition, the baseline representing the
+protocols with imbalanced source domain.                                                    removal of all three parts above is added to the comparison. Ablation
+     Our DIDA achieves the highest prediction accuracy due to its abil-                     study results are listed in Table 9.
+ity to overcome both feature shift and label shift, namely, adapting                            The results show that the third key parts above are all important for
+to imbalanced distributions and narrowing category-wise feature dis-                        our DIDA, that is, they all contribute to a better generalization on IDA
+tribution discrepancy mainly through cost-sensitive re-weighting and                        tasks. By comparison, the contribution of margin loss regularization is
+semantic alignment. Although DIDA has few significant advantages                            slightly lower since it plays a role on the basis of the other two. For
+over existing domain adaptation based methods when no label shift is                        all IDA protocols, semantic alignment is very significant since feature
+assumed to exist, the accuracy improvement is extremely significant                         shift is always present. Differently, cost-sensitive re-weighting is more
+when label shift inevitably occurs in practical scenarios. This validates                   necessary on imbalanced datasets due to the different degrees of label
+                                                                                            shift.
+the necessity of proposing IDA methods to specifically address the IDA
+                                                                                                For the IDA fault diagnosis task with both feature shift and label
+task. In addition, our DIDA is also more adaptable to IDA scenarios with
+                                                                                            shift, DIDA obtains a much better prediction performance than baseline.
+severely imbalanced distributions and label shift compared to MiDAN
+                                                                                            Each key part is indispensable, further validating the rationality and
+and Imba-DA. The latter ones have obviously weaker performance in
+                                                                                            effectiveness of our proposed DIDA.
+our case studies with I2I protocol.
+
+                                                                                            4.5.2. Hyperparameter tuning
+4.5. Further study                                                                             Although few hyperparameters in our DIDA need to be preset, only
+                                                                                            the class-balanced factor 𝛽 and the trade-off factor 𝜇, their impact
+   This section carries out an ablation study and hyperparameter tun-                       on performance is worth investigating. Fig. 12 presents the DIDA
+ing to further investigate the DIDA approach for fault diagnosis. Note                      performance with different hyperparameter settings. The impact of
+that the following further study is based on our self-built datasets.                       both parameters on the performance of DIDA for cross-domain fault
+
+                                                                                       10
+Y. Ding et al.                                                                                                            Reliability Engineering and System Safety 230 (2023) 108890
+
+
+diagnosis on IDA tasks is significant and thus a reasonable choice is                          [4] Manjurul Islam MM, Kim J-M. Reliable multiple combined fault diagnosis of
+necessary. It is noteworthy that DIDA degenerates to AB-3 and AB-2 in                              bearings using heterogeneous feature models and multiclass support vector
+                                                                                                   machines. Rel Eng Syst Saf 2019;184:55–66. http://dx.doi.org/10.1016/j.ress.
+the ablation experiment when the values of parameters, 𝛽 and 𝜇, are
+                                                                                                   2018.02.012.
+taken as zero, respectively.                                                                   [5] Wang Z, Zhou J, Du W, Lei Y, Wang J. Bearing fault diagnosis method based
+                                                                                                   on adaptive maximum cyclostationarity blind deconvolution. Mech Syst Signal
+5. Conclusion                                                                                      Process 2022;162:108018. http://dx.doi.org/10.1016/j.ymssp.2021.108018.
+                                                                                               [6] Ding Y, Jia M, Miao Q, Huang P. Remaining useful life estimation using deep
+                                                                                                   metric transfer learning for kernel regression. Rel Eng Syst Saf 2021;212. http:
+     Aiming at the challenging fault diagnosis task with an IDA setting,
+                                                                                                   //dx.doi.org/10.1016/j.ress.2021.107583.
+this paper proposed a deep imbalanced domain adaptation (DIDA)                                 [7] Fu S, Zhang Y, Lin L, Zhao M, Zhong S-s. Deep residual LSTM with domain-
+framework and presented its implementation for fault diagnosis of                                  invariance for remaining useful life prediction across domains. Rel Eng Syst Saf
+bearings under multiple working conditions. Our DIDA effectively over-                             2021;216:108012. http://dx.doi.org/10.1016/j.ress.2021.108012.
+comes the simultaneous presence of feature shift and label shift on                            [8] Shao H, Jiang H, Zhang H, Duan W, Liang T, Wu S. Rolling bearing fault feature
+the source and target domains to exclude class-imbalanced distribu-                                learning using improved convolutional deep belief network with compressed
+                                                                                                   sensing. Mech Syst Signal Process 2018;100:743–65. http://dx.doi.org/10.1016/
+tion interference and reduce domain differences, thus extracting more                              j.ymssp.2017.08.002.
+discriminative domain-invariant features. In addition, we designed the                         [9] Zhao M, Zhong S, Fu X, Tang B, Pecht M. Deep residual shrinkage networks
+setup to simulate IDA protocols on experimental datasets, through                                  for fault diagnosis. IEEE Trans Ind Inf 2020;16(7):4681–90. http://dx.doi.org/
+which the case study of DIDA is carried out. Detailed comparative                                  10.1109/tii.2019.2943898.
+studies have validated the effectiveness and higher accuracy of DIDA                          [10] Chen Z, Mauricio A, Li W, Gryllias K. A deep learning method for bearing fault
+                                                                                                   diagnosis based on cyclic spectral coherence and convolutional neural networks.
+compared to state-of-the-art methods. Further studies fully validate the                           Mech Syst Signal Process 2020;140:106683. http://dx.doi.org/10.1016/j.ymssp.
+design rationality and necessity of DIDA in IDA scenarios.                                         2020.106683.
+     Having said these, we believe that fault diagnosis with IDA protocols                    [11] Chen X, Zhang B, Gao D. Bearing fault diagnosis base on multi-scale CNN
+still deserves more in-depth research. We will further explore the                                 and LSTM model. J Intell Manuf 2021;32(4):971–87. http://dx.doi.org/10.1007/
+transfer properties under more complex conditions and provide more                                 s10845-020-01600-2.
+                                                                                              [12] Mao W, Feng W, Liu Y, Zhang D, Liang X. A new deep auto-encoder method
+theoretical work in the future. We believe it would be more efficient                              with fusing discriminant information for bearing fault diagnosis. Mech Syst Signal
+to come up with simpler solutions than to blend multiple strategies.                               Process 2021;150:107233. http://dx.doi.org/10.1016/j.ymssp.2020.107233.
+Therefore, a metric that directly measures cross-domain feature shift                         [13] Ding Y, Jia M, Miao Q, Cao Y. A novel time– frequency transformer based
+and label shift would be highly desirable. We are also looking forward                             on self– attention mechanism and its application in fault diagnosis of rolling
+to more relevant work for IDAs.                                                                    bearings. Mech Syst Signal Process 2022;168:108616. http://dx.doi.org/10.1016/
+                                                                                                   j.ymssp.2021.108616.
+                                                                                              [14] Bao Z, Du J, Zhang W, Wang J, Qiu T, Cao Y. A transformer model-based
+CRediT authorship contribution statement                                                           approach to bearing fault diagnosis. In: Zeng J, Qin P, Jing W, Song X, Lu Z,
+                                                                                                   editors. Data science. Communications in computer and information science,
+    Yifei Ding: Conceptualization, Data curation, Formal analysis,                                 Singapore: Springer; 2021, p. 65–79. http://dx.doi.org/10.1007/978-981-16-
+Methodology, Software, Validation, Visualization, Writing – original                               5940-9_5.
+                                                                                              [15] Neupane D, Seok J. Bearing fault detection and diagnosis using case western
+draft, Writing – review & editing. Minping Jia: Conceptualization,
+                                                                                                   reserve university dataset with deep learning approaches: A review. IEEE Access
+Funding acquisition, Project administration, Resources, Supervision,                               2020;8:93155–78. http://dx.doi.org/10.1109/access.2020.2990528.
+Writing – review & editing. Jichao Zhuang: Validation, Visualiza-                             [16] Wang J, Lan C, Liu C, Ouyang Y, Qin T. Generalizing to unseen domains: A
+tion, Writing – review & editing. Yudong Cao: Validation, Writing                                  survey on domain generalization. 2021, arXiv:210303097 [Cs].
+– review & editing. Xiaoli Zhao: Investigation, Writing – review &                            [17] Pan SJ, Yang Q. A survey on transfer learning. IEEE Trans Knowl Data Eng
+                                                                                                   2010;22(10):1345–59. http://dx.doi.org/10.1109/TKDE.2009.191.
+editing. Chi-Guhn Lee: Supervision, Writing – review & editing.
+                                                                                              [18] Wen L, Gao L, Li X. A new deep transfer learning based on sparse auto-
+                                                                                                   encoder for fault diagnosis. IEEE Trans Syst Man Cybern Syst 2019;49(1):136–44.
+Declaration of competing interest                                                                  http://dx.doi.org/10.1109/TSMC.2017.2754287.
+                                                                                              [19] Qian Q, Qin Y, Wang Y, Liu F. A new deep transfer learning network based
+    The authors declare that they have no known competing finan-                                   on convolutional auto-encoder for mechanical fault diagnosis. Measurement
+                                                                                                   2021;178:109352. http://dx.doi.org/10.1016/j.measurement.2021.109352.
+cial interests or personal relationships that could have appeared to
+                                                                                              [20] Wang Z, Cui J, Cai W, Li Y. Partial transfer learning of multidiscriminator
+influence the work reported in this paper.                                                         deep weighted adversarial network in cross-machine fault diagnosis. IEEE Trans
+Data availability                                                                                  Instrum Meas 2022;71:1–10. http://dx.doi.org/10.1109/TIM.2022.3166786.
+                                                                                              [21] Xia M, Shao H, Williams D, Lu S, Shu L, de Silva CW. Intelligent fault diagnosis
+    The authors do not have permission to share data.                                              of machinery using digital twin-assisted deep transfer learning. Rel Eng Syst Saf
+                                                                                                   2021;215:107938. http://dx.doi.org/10.1016/j.ress.2021.107938.
+                                                                                              [22] Han T, Liu C, Yang W, Jiang D. Deep transfer network with joint distribution
+Acknowledgments                                                                                    adaptation: A new intelligent fault diagnosis framework for industry application.
+                                                                                                   ISA Trans 2020;97:269–81. http://dx.doi.org/10.1016/j.isatra.2019.08.012.
+   The authors gratefully acknowledge the financial support of the                            [23] Yang J, Yang J, Wang S, Cao S, Zou H, Xie L. Advancing imbalanced do-
+National Natural Science Foundation of China (No. 52075095) and                                    main adaptation: Cluster-level discrepancy minimization with a comprehensive
+                                                                                                   benchmark. IEEE Trans Cybern 2021;1–12. http://dx.doi.org/10.1109/TCYB.
+the Postgraduate Research & Practice Innovation Program of Jiangsu
+                                                                                                   2021.3093888.
+Province, China (KYCX21_0082).                                                                [24] Zhu P, Dong S, Pan X, Hu X, Zhu S. A simulation-data-driven subdomain
+                                                                                                   adaptation adversarial transfer learning network for rolling element bearing
+References                                                                                         fault diagnosis. Meas Sci Technol 2022;33(7):075101. http://dx.doi.org/10.
+                                                                                                   1088/1361-6501/ac57ef.
+ [1] Xu Z, Saleh JH. Machine learning for reliability engineering and safety appli-           [25] Wen L, Li X, Gao L. A transfer convolutional neural network for fault diagnosis
+     cations: Review of current status and future opportunities. Rel Eng Syst Saf                  based on ResNet-50. Neural Comput Appl 2020;32(10):6111–24. http://dx.doi.
+     2021;211:107530. http://dx.doi.org/10.1016/j.ress.2021.107530.                                org/10.1007/s00521-019-04097-w.
+ [2] Zhao W, Wang Z, Cai W, Zhang Q, Wang J, Du W, et al. Multiscale inverted                 [26] Zhang T, Chen J, Li F, Zhang K, Lv H, He S, et al. Intelligent fault diagnosis of
+     residual convolutional neural network for intelligent diagnosis of bearings under             machines with small & imbalanced data: A state-of-the-art review and possible
+     variable load condition. Measurement 2022;188:110511. http://dx.doi.org/10.                   extensions. ISA Trans 2022;119:152–71. http://dx.doi.org/10.1016/j.isatra.2021.
+     1016/j.measurement.2021.110511.                                                               02.042.
+ [3] Ding Y, Zhuang J, Ding P, Jia M. Self-supervised pretraining via contrast                [27] Wu J, Zhao Z, Sun C, Yan R, Chen X. Learning from class-imbalanced data with
+     learning for intelligent incipient fault detection of bearings. Rel Eng Syst Saf              a model-agnostic framework for machine intelligent diagnosis. Rel Eng Syst Saf
+     2022;218:108126. http://dx.doi.org/10.1016/j.ress.2021.108126.                                2021;216:107934. http://dx.doi.org/10.1016/j.ress.2021.107934.
+
+
+                                                                                         11
+Y. Ding et al.                                                                                                             Reliability Engineering and System Safety 230 (2023) 108890
+
+
+[28] Wu Z, Zhang H, Guo J, Ji Y, Pecht M. Imbalanced bearing fault diagnosis                   [37] Zou Y, Yu Z, Kumar BVKV, Wang J. Unsupervised domain adaptation for
+     under variant working conditions using cost-sensitive deep domain adaptation                   semantic segmentation via class-balanced self-training. In: Proceedings of the
+     network. Expert Syst Appl 2022;193:116459. http://dx.doi.org/10.1016/j.eswa.                   European conference on computer vision. 2018, p. 289–305.
+     2021.116459.                                                                              [38] Chawla NV, Bowyer KW, Hall LO, Kegelmeyer WP. SMOTE: Synthetic minority
+[29] Tan Y, Guo L, Gao H, Lin Z, Liu Y. MiDAN: A framework for cross-domain intel-                  over-sampling technique. J Artificial Intelligence Res 2002;16:321–57. http://dx.
+     ligent fault diagnosis with imbalanced datasets. Measurement 2021;183:109834.                  doi.org/10.1613/jair.953.
+     http://dx.doi.org/10.1016/j.measurement.2021.109834.                                      [39] Wang Y-X, Ramanan D, Hebert M. Learning to model the tail. In: Proceedings
+[30] Liu X, Chen J, Zhang K, Liu S, He S, Zhou Z. Cross-domain intelligent bearing                  of the 31st international conference on neural information processing systems.
+     fault diagnosis under class imbalanced samples via transfer residual network                   NIPS’17, Long Beach, California, USA; 2017, p. 7032–42.
+     augmented with explicit weight self-assignment strategy based on meta data.               [40] Jamal MA, Brown M, Yang M-H, Wang L, Gong B. Rethinking class-balanced
+     Knowl-Based Syst 2022;251:109272. http://dx.doi.org/10.1016/j.knosys.2022.                     methods for long-tailed visual recognition from a domain adaptation perspective.
+     109272.                                                                                        In: Proceedings of the IEEE/CVF conference on computer vision and pattern
+[31] Kuang J, Xu G, Tao T, Wu Q. Class-imbalance adversarial transfer learning                      recognition. 2020, p. 7610–9.
+     network for cross-domain fault diagnosis with imbalanced data. IEEE Trans                 [41] Cao K, Wei C, Gaidon A, Arechiga N, Ma T. Learning imbalanced datasets with
+     Instrum Meas 2022;71:1–11. http://dx.doi.org/10.1109/TIM.2021.3136175.                         label-distribution-aware margin loss. In: Proceedings of the 33rd international
+[32] Long M, Cao Y, Wang J, Jordan MI. Learning transferable features with deep                     conference on neural information processing systems. 2019, p. 1567–78.
+     adaptation networks. In: 32nd international conference on machine learning, vol.          [42] Cui Y, Jia M, Lin T-Y, Song Y, Belongie S. Class-balanced loss based on effective
+     1. 2015, p. 97–105, arXiv:1502.02791.                                                          number of samples. In: Proceedings of the IEEE/CVF conference on computer
+[33] Zellinger W, Grubinger T, Lughofer E, Natschläger T, Saminger-Platz S. Central                 vision and pattern recognition. 2019, p. 9268–77.
+     moment discrepancy (CMD) for domain-invariant representation learning. 2019,              [43] Zhu Y, Zhuang F, Wang J, Ke G, Chen J, Bian J, et al. Deep subdomain adaptation
+     arXiv:170208811 [Cs Stat].                                                                     network for image classification. IEEE Trans Neural Netw Learn Syst 2020;1–10.
+[34] Tan S, Peng X, Saenko K. Class-imbalanced domain adaptation: an empirical                      http://dx.doi.org/10.1109/tnnls.2020.2988928.
+     odyssey. In: Bartoli A, Fusiello A, editors. Computer vision – ECCV 2020                  [44] Reed WJ. The Pareto, Zipf and other power laws. Econom Lett 2001;74(1):15–9.
+     workshops. Cham: Springer International Publishing; 2020, p. 585–602. http:                    http://dx.doi.org/10.1016/S0165-1765(01)00524-9.
+     //dx.doi.org/10.1007/978-3-030-66415-2_38.                                                [45] Ganin Y, Ustinova E, Ajakan H, Germain P, Larochelle H, Laviolette F, et al.
+[35] Kang B, Xie S, Rohrbach M, Yan Z, Gordo A, Feng J, et al. Decoupling repre-                    Domain-adversarial training of neural networks. Adv Comput Vis Pattern Recog-
+     sentation and classifier for long-tailed recognition. In: International conference             nit 2017;17:189–209. http://dx.doi.org/10.1007/978-3-319-58347-1_10, arXiv:
+     on learning representations. 2019.                                                             1505.07818.
+[36] Huang C, Li Y, Loy CC, Tang X. Learning deep representation for imbalanced
+     classification. In: Proceedings of the IEEE conference on computer vision and
+     pattern recognition. 2016, p. 5375–84.
+
+
+
+
+                                                                                          12
+
