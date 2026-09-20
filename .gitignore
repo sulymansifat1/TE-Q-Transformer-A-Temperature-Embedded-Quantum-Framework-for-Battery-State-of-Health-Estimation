@@ -24,24 +24,29 @@ ENV/
 Thumbs.db
 ehthumbs.db
 
-# Large raw datasets & archives (processed .npy files in datasets/ are preserved)
+# Large raw datasets & archives
 Dataset/
 datasets/CALCE/raw/
 *.zip
 *.tar.gz
 *.rar
 
-# Scratch and intermediate experiment artifacts
-scratch/
+# Model checkpoints & weights
+*.pth
+*.pt
+*.ckpt
+*.bin
+artifacts/
+configs/
+
+# Experimental outputs, results, reports, figures, logs
+results/
+reports/
+Experiment/
 GarbageResults/
 E07_results/
+scratch/
+Te_Q_draft/
 *.tmp
+*.log
 .pytest_cache/
-
-# LaTeX build artifacts & temporary page preview renders
-Te_Q_draft/*.aux
-Te_Q_draft/*.log
-Te_Q_draft/*.out
-Te_Q_draft/*.blg
-Te_Q_draft/*.png
-Te_Q_draft/*.pdf
