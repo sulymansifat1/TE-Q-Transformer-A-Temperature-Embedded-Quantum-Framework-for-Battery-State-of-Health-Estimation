@@ -24,7 +24,7 @@ Official research code repository for **TE-Q-Transformer**, a hybrid quantum-cla
 Reliable state-of-health (SOH) estimation is essential for the safe and efficient operation of lithium-ion batteries in electric vehicles and energy storage systems. Operating temperature strongly affects battery aging. However, existing data-driven models simply treat temperature as an ordinary numerical input, ignoring the underlying physical degradation kinetics. As a result, these models often struggle to generalize across different, unseen cells. To address this, we introduce **TE-Q-Transformer**, a hybrid framework that integrates Arrhenius-based kinetics for high-temperature solid electrolyte interphase growth and low-temperature lithium plating into a four-qubit simulated quantum circuit and a Conv1D-Transformer backbone. Controlled ablations and cross-cell evaluations demonstrate that embedding degradation kinetics directly into input features substantially improves cross-cell state-of-health estimation.
 
 The complete research code, datasets, and implementation framework are publicly available at:  
-👉 **[https://github.com/sulymansifat1/TE-Q-Transformer-A-Temperature-Embedded-Quantum-Framework-for-Battery-State-of-Health-Estimation](https://github.com/sulymansifat1/TE-Q-Transformer-A-Temperature-Embedded-Quantum-Framework-for-Battery-State-of-Health-Estimation)**
+👉 **[https://github.com/sulymansifat1/TE-Q-Transformer](https://github.com/sulymansifat1/TE-Q-Transformer-A-Temperature-Embedded-Quantum-Framework-for-Battery-State-of-Health-Estimation)**
 
 ---
 
