@@ -45,6 +45,8 @@ reports/
 Experiment/
 GarbageResults/
 E07_results/
+E06_results/
+baselineComparison.ipynb
 scratch/
 Te_Q_draft/
 *.tmp
