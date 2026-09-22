@@ -51,7 +51,7 @@ This physical angle is coupled with normalized voltage, current, and intra-cycle
 > [!NOTE]
 > **Quantum Simulation Disclaimer:** All quantum components are simulated classically via PennyLane state-vector routines. We claim no quantum hardware advantage or fault-tolerant quantum supremacy; the parameterized circuit serves as a non-linear feature transformation layer.
 
----
+----
 
 ## Repository Structure
 
