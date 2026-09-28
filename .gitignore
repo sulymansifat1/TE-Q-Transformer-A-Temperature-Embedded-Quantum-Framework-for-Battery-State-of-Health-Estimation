@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Large raw datasets & archives
+Dataset/
+datasets/CALCE/raw/
+*.zip
+*.tar.gz
+*.rar
+
+# Model checkpoints & weights
+*.pth
+*.pt
+*.ckpt
+*.bin
+artifacts/
+configs/
+
+# Experimental outputs, results, reports, figures, logs
+results/
+reports/
+Experiment/
+GarbageResults/
+E07_results/
+E06_results/
+baselineComparison.ipynb
+scratch/
+Te_Q_draft/
+*.tmp
+*.log
+.pytest_cache/
