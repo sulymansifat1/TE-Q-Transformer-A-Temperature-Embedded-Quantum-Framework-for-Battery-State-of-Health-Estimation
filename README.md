@@ -1,4 +1,4 @@
-# TE-Q-Transformer: A Temperature-Embedded Quantum Framework for Battery State-of-Health Estimation
+# TE-Q-Transformer: A Physics-Informed Temperature-Embedded Quantum Framework for Battery State-of-Health Estimation
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
