@@ -1,0 +1,5 @@
+Method,Channel,Pooled_Base_RMSE,Mean_Delta_RMSE,Std_Delta_RMSE,Notes
+Permutation Importance (10 shuffles),Voltage,0.023675711825489998,0.10164480619132518,0.0034229665599601355,Permuted across test cycles
+Permutation Importance (10 shuffles),Current,0.023675711825489998,0.1598530363291502,0.005243423883582696,Permuted across test cycles
+Permutation Importance (10 shuffles),Temperature,0.023675711825489998,0.03058660216629505,0.0021654176320392233,Permuted across test cycles
+Permutation Importance (10 shuffles),Time,0.023675711825489998,0.0,0.0,Deterministic intra-cycle 0-1 ramp; identical across cycles so cycle permutation delta is 0

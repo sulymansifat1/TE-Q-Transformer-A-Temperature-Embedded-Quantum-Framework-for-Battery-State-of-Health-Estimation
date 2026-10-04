@@ -1,0 +1,5 @@
+Method,Channel,B0018_RMSE,B0032_RMSE,B0053_test_RMSE,Macro_RMSE,Delta_Macro_RMSE,Notes
+Zero-shot Baseline Replacement,Voltage,0.1342761069536209,0.009697694331407547,0.04171277955174446,0.06189552694559097,0.04511479350427787,Channel replaced by training reference baseline without model retraining; measures input-space sensitivity
+Zero-shot Baseline Replacement,Current,0.09262747317552567,0.35196903347969055,0.07704470306634903,0.17388040324052176,0.15709966979920864,Channel replaced by training reference baseline without model retraining; measures input-space sensitivity
+Zero-shot Baseline Replacement,Temperature,0.027147337794303894,0.012092225253582,0.16574613749980927,0.06832856684923172,0.05154783340791862,Channel replaced by training reference baseline without model retraining; measures input-space sensitivity
+Zero-shot Baseline Replacement,Time,0.03906386345624924,0.026303524151444435,0.23203004896640778,0.09913247885803382,0.08235174541672072,Channel replaced by training reference baseline without model retraining; measures input-space sensitivity

@@ -117,7 +117,12 @@ Input [B, 512, 4]
 │   │   └── ablation_study.ipynb               # Architectural component ablation experiments
 │   ├── generalization/
 │   │   └── generalization_study.ipynb         # Unseen-cell and temporal extrapolation experiments
+│   ├── statistical_significance_test_NASA.ipynb
+│   ├── integrated_gradients_explainability_NASA.ipynb
 │   └── Calce.ipynb                            # CALCE cross-cell and temporal extrapolation evaluation
+├── baselineComparison_Nasa.ipynb              # Stored-prediction NASA baseline table
+├── data/
+│   └── nasa_manuscript/                       # Held-out predictions and IG records used by the notebooks
 │
 ├── src/
 │   ├── __init__.py
